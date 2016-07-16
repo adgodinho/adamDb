@@ -270,6 +270,28 @@ class SqliteTableTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(array(2, 5), $table->getConditionBuilder()->getValues());
     }
 
+    public function testMultipleOrConditions()
+    {
+        $table = $this->db->table('test');
+
+        $this->assertEquals(
+            'SELECT * FROM "test"   WHERE "a" IS NOT NULL AND ("b" = ? OR ("b" != ? OR "c" = ?) OR "c" >= ?)',
+            $table
+                ->notNull('a')
+                ->beginOr()
+                    ->eq('b', 2)
+                    ->beginOr()
+                        ->neq('b', 6)
+                        ->eq('c', 3)
+                    ->closeOr()
+                    ->gte('c', 5)
+                ->closeOr()
+                ->buildSelectQuery()
+        );
+
+        $this->assertEquals(array(2, 6, 3, 5), $table->getConditionBuilder()->getValues());
+    }
+
     public function testPersist()
     {
         $this->assertNotFalse($this->db->execute('CREATE TABLE foobar_persist (id INTEGER PRIMARY KEY, a TEXT)'));
