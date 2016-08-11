@@ -724,6 +724,6 @@ class Table
      */
      public function __clone()
      {
-       $this->conditionBuilder = clone $this->conditionBuilder;
+         $this->conditionBuilder = clone $this->conditionBuilder;
      }
 }
