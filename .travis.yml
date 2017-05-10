@@ -2,6 +2,7 @@ language: php
 sudo: false
 
 php:
+  - 7.1
   - 7.0
   - 5.6
   - 5.5
@@ -17,10 +18,10 @@ matrix:
   fast_finish: true
 
 before_script:
-  - composer dump-autoload
+  - composer install
   - if [[ "$DB" == "postgres" ]]; then psql -c "DROP DATABASE IF EXISTS picodb;" -U postgres; fi
   - if [[ "$DB" == "postgres" ]]; then psql -c "CREATE DATABASE picodb;" -U postgres; fi
   - if [[ "$DB" == "mysql" ]]; then mysql -e "CREATE DATABASE IF NOT EXISTS picodb;" -uroot; fi
 
 script:
-  - phpunit --testsuite $DB
+  - ./vendor/bin/phpunit --testsuite $DB
