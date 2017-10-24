@@ -98,6 +98,10 @@ class Mysql extends Base
             $options[PDO::MYSQL_ATTR_SSL_CA] = $settings['ssl_ca'];
         }
 
+        if (! empty($settings['persistent'])) {
+            $options[PDO::ATTR_PERSISTENT] = $settings['persistent'];
+        }
+
         return $options;
     }
 
