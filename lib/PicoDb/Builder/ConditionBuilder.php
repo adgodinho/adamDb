@@ -1,9 +1,7 @@
 <?php
 
-namespace PicoDb\Builder;
-
-use PicoDb\Database;
-use PicoDb\Table;
+require_once __DIR__.'/../Database.php';
+require_once __DIR__.'/../Table.php';
 
 /**
  * Handle SQL conditions

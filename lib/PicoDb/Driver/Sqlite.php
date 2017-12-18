@@ -1,10 +1,5 @@
 <?php
 
-namespace PicoDb\Driver;
-
-use PDO;
-use PDOException;
-
 /**
  * Sqlite Driver
  *

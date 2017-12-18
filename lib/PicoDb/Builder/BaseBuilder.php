@@ -1,8 +1,6 @@
 <?php
 
-namespace PicoDb\Builder;
-
-use PicoDb\Database;
+require_once __DIR__.'/../Database.php';
 
 /**
  * Class InsertBuilder

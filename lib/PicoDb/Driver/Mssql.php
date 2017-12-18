@@ -1,9 +1,5 @@
 <?php
 
-namespace PicoDb\Driver;
-
-use PDO;
-
 /**
  * Microsoft SQL Server Driver
  *

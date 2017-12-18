@@ -1,12 +1,9 @@
 <?php
 
-namespace PicoDb;
-
-use LogicException;
-use PicoDb\Driver\Mssql;
-use PicoDb\Driver\Mysql;
-use PicoDb\Driver\Postgres;
-use PicoDb\Driver\Sqlite;
+require_once __DIR__.'/Driver/Mssql.php';
+require_once __DIR__.'/Driver/Sqlite.php';
+require_once __DIR__.'/Driver/Mysql.php';
+require_once __DIR__.'/Driver/Postgres.php';
 
 /**
  * Class DriverFactory

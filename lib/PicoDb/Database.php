@@ -1,14 +1,9 @@
 <?php
 
-namespace PicoDb;
-
-use Closure;
-use PDOException;
-use LogicException;
-use PicoDb\Driver\Mssql;
-use PicoDb\Driver\Sqlite;
-use PicoDb\Driver\Mysql;
-use PicoDb\Driver\Postgres;
+require_once __DIR__.'/Driver/Mssql.php';
+require_once __DIR__.'/Driver/Sqlite.php';
+require_once __DIR__.'/Driver/Mysql.php';
+require_once __DIR__.'/Driver/Postgres.php';
 
 /**
  * Database

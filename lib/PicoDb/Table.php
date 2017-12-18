@@ -1,12 +1,8 @@
 <?php
 
-namespace PicoDb;
-
-use PDO;
-use Closure;
-use PicoDb\Builder\ConditionBuilder;
-use PicoDb\Builder\InsertBuilder;
-use PicoDb\Builder\UpdateBuilder;
+require_once __DIR__.'/Builder/ConditionBuilder.php';
+require_once __DIR__.'/Builder/InsertBuilder.php';
+require_once __DIR__.'/Builder/UpdateBuilder.php';
 
 /**
  * Table

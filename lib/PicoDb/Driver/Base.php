@@ -1,11 +1,5 @@
 <?php
 
-namespace PicoDb\Driver;
-
-use PDO;
-use LogicException;
-use PDOException;
-
 /**
  * Base Driver class
  *

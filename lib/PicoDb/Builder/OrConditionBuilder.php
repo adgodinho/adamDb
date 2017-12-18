@@ -1,7 +1,5 @@
 <?php
 
-namespace PicoDb\Builder;
-
 /**
  * Class OrConditionBuilder
  *

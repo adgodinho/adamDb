@@ -1,10 +1,7 @@
 <?php
 
-namespace PicoDb;
-
-use PDO;
-use PicoDb\Builder\InsertBuilder;
-use PicoDb\Builder\UpdateBuilder;
+require_once __DIR__.'/Builder/InsertBuilder.php';
+require_once __DIR__.'/Builder/UpdateBuilder.php';
 
 /**
  * Handle Large Objects (LOBs)

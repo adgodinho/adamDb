@@ -1,6 +1,6 @@
 <?php
 
-namespace PicoDb\Builder;
+require_once __DIR__.'/BaseBuilder.php';
 
 /**
  * Class UpdateBuilder

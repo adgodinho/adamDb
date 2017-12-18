@@ -1,11 +1,5 @@
 <?php
 
-namespace PicoDb;
-
-use PDO;
-use PDOException;
-use PDOStatement;
-
 /**
  * Statement Handler
  *

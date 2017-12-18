@@ -1,9 +1,5 @@
 <?php
 
-namespace PicoDb;
-
-use PDO;
-
 /**
  * HashTable (key/value)
  *

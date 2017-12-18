@@ -1,9 +1,5 @@
 <?php
 
-namespace PicoDb;
-
-use PDOException;
-
 /**
  * Schema migration class
  *

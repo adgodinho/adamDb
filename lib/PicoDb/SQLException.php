@@ -1,9 +1,5 @@
 <?php
 
-namespace PicoDb;
-
-use Exception;
-
 /**
  * SQLException
  *
