@@ -53,7 +53,8 @@ abstract class BaseBuilder
      */
     public static function getInstance(Database $db, ConditionBuilder $condition)
     {
-        return new static($db, $condition);
+        $class = get_class($this);
+        return new $class($db, $condition);
     }
 
     /**

@@ -59,7 +59,7 @@ class UrlParser
      */
     public function getSettings($url = '')
     {
-        $url = $url ?: $this->url;
+        $url = $url ? $url : $this->url;
         $components = parse_url($url);
 
         if ($components === false) {

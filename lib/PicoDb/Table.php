@@ -460,8 +460,8 @@ class Table
         $this->joins[] = sprintf(
             'LEFT JOIN %s ON %s=%s',
             $this->db->escapeIdentifier($table),
-            $this->db->escapeIdentifier($alias ?: $table).'.'.$this->db->escapeIdentifier($foreign_column),
-            $this->db->escapeIdentifier($local_table ?: $this->name).'.'.$this->db->escapeIdentifier($local_column)
+            $this->db->escapeIdentifier($alias ? $alias : $table).'.'.$this->db->escapeIdentifier($foreign_column),
+            $this->db->escapeIdentifier($local_table ? $local_table : $this->name).'.'.$this->db->escapeIdentifier($local_column)
         );
 
         return $this;
