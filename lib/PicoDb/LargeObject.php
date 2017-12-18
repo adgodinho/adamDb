@@ -1,7 +1,7 @@
 <?php
 
-require_once __DIR__.'/Builder/InsertBuilder.php';
-require_once __DIR__.'/Builder/UpdateBuilder.php';
+require_once dirname(__FILE__).'/Builder/InsertBuilder.php';
+require_once dirname(__FILE__).'/Builder/UpdateBuilder.php';
 
 /**
  * Handle Large Objects (LOBs)

@@ -1,9 +1,9 @@
 <?php
 
-require_once __DIR__.'/Driver/Mssql.php';
-require_once __DIR__.'/Driver/Sqlite.php';
-require_once __DIR__.'/Driver/Mysql.php';
-require_once __DIR__.'/Driver/Postgres.php';
+require_once dirname(__FILE__).'/Driver/Mssql.php';
+require_once dirname(__FILE__).'/Driver/Sqlite.php';
+require_once dirname(__FILE__).'/Driver/Mysql.php';
+require_once dirname(__FILE__).'/Driver/Postgres.php';
 
 /**
  * Class DriverFactory

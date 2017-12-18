@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__.'/Builder/ConditionBuilder.php';
-require_once __DIR__.'/Builder/InsertBuilder.php';
-require_once __DIR__.'/Builder/UpdateBuilder.php';
+require_once dirname(__FILE__).'/Builder/ConditionBuilder.php';
+require_once dirname(__FILE__).'/Builder/InsertBuilder.php';
+require_once dirname(__FILE__).'/Builder/UpdateBuilder.php';
 
 /**
  * Table

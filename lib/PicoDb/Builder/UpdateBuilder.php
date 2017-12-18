@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/BaseBuilder.php';
+require_once dirname(__FILE__).'/BaseBuilder.php';
 
 /**
  * Class UpdateBuilder
