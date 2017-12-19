@@ -4,6 +4,7 @@ require_once dirname(__FILE__).'/Driver/Mssql.php';
 require_once dirname(__FILE__).'/Driver/Sqlite.php';
 require_once dirname(__FILE__).'/Driver/Mysql.php';
 require_once dirname(__FILE__).'/Driver/Postgres.php';
+require_once dirname(__FILE__).'/Builder/OrConditionBuilder.php';
 
 function __autoload($class_name) {
     require_once($class_name.'.php');

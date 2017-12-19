@@ -39,13 +39,14 @@ class Mssql extends Base
      */
     public function createConnection(array $settings)
     {
-        $dsn = 'sqlsrv:Server=' . $settings['hostname'] . ';Database=' . $settings['database'];
-
         if (! empty($settings['port'])) {
-            $dsn .= ';port=' . $settings['port'];
+            $dsn = 'dblib:host=' . $settings['hostname'] . ':' . $settings['port'] . ';dbname=' . $settings['database'];
+        } {
+            $dsn = 'dblib:host=' . $settings['hostname'] . ';dbname=' . $settings['database'];
         }
 
         $this->pdo = new PDO($dsn, $settings['username'], $settings['password']);
+        $this->pdo->setAttribute( PDO::ATTR_CASE, PDO::CASE_LOWER );
 
         if (isset($settings['schema_table'])) {
             $this->schemaTable = $settings['schema_table'];
