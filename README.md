@@ -3,9 +3,6 @@ PicoDb
 
 PicoDb is a minimalist database query builder for PHP.
 
-[![Build Status](https://travis-ci.org/fguillot/picoDb.svg?branch=master)](https://travis-ci.org/fguillot/picoDb)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/fguillot/picoDb/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/fguillot/picoDb/?branch=master)
-
 Features
 --------
 
@@ -14,13 +11,13 @@ Features
 - Requires only PDO
 - Use prepared statements
 - Handle schema migrations
-- Fully unit tested on PHP 5.3, 5.4, 5.5, 5.6 and 7.0
+- Fully unit tested on PHP 5.2 (Testing), 5.3, 5.4, 5.5, 5.6 and 7.0
 - License: MIT
 
 Requirements
 ------------
 
-- PHP >= 5.3
+- PHP >= 5.2
 - PDO extension
 - Sqlite, Mssql, Mysql or Postgresql
 
@@ -34,8 +31,10 @@ Documentation
 
 ### Installation
 
+Add /lib/PicoDb to you project and call:
+
 ```bash
-composer require fguillot/picodb @stable
+require_once dirname(__FILE__).'/lib/PicoDb/Database.php';
 ```
 
 ### Database connection
@@ -460,6 +459,12 @@ $db->table('mytable')
 ```
 
 ### Debugging
+
+Debug similar to ADOdb debug:
+
+```php
+$db->debug();
+```
 
 Log generated queries:
 
