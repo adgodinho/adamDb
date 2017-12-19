@@ -48,6 +48,14 @@ class StatementHandler
      */
     protected $logQueries = false;
 
+     /**
+     * Print sql on each query
+     *
+     * @access protected
+     * @var boolean
+     */
+    protected $debug = false;
+
     /**
      * Run explain command on each query
      *
@@ -124,6 +132,18 @@ class StatementHandler
     public function withLogging()
     {
         $this->logQueries = true;
+        return $this;
+    }
+
+    /**
+     * Enable query debugging
+     *
+     * @access public
+     * @return $this
+     */
+    public function withDebugging()
+    {
+        $this->debug = true;
         return $this;
     }
 
@@ -303,6 +323,14 @@ class StatementHandler
 
         if ($this->explain) {
             $this->db->setLogMessages($this->db->getDriver()->explain($this->sql, $this->positionalParams));
+        }
+
+        if ($this->debug) {
+            echo "<br><hr>", $this->sql;
+            if (!empty($this->positionalParams)) {
+                echo "<code><br>", print_r($this->positionalParams, true), "</code>";
+            }
+            echo "<hr>";
         }
 
         $this->nbQueries++;

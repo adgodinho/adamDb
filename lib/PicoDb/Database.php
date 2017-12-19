@@ -199,6 +199,19 @@ class Database
     }
 
     /**
+     * Enable query debugging
+     *
+     * @access public
+     * @return $this
+     */
+    public function debug()
+    {
+        $this->statementHandler->withLogging();
+        $this->statementHandler->withDebugging();
+        return $this->statementHandler;
+    }
+
+    /**
      * Release the PDO connection
      *
      * @access public
