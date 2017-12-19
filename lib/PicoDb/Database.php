@@ -51,6 +51,13 @@ class Database
     private $driver;
 
     /**
+     * In Transaction Flag
+     *
+     * @access private
+     */
+    private $inTransaction;
+
+    /**
      * Initialize the driver
      *
      * @access public
@@ -60,6 +67,7 @@ class Database
     {
         $this->driver = DriverFactory::getDriver($settings);
         $this->statementHandler = new StatementHandler($this);
+        $this->inTransaction = false;
     }
 
     /**
@@ -285,7 +293,8 @@ class Database
      */
     public function startTransaction()
     {
-        if (! $this->getConnection()->inTransaction()) {
+        if (!$this->inTransaction) {
+            $this->inTransaction = true;
             $this->getConnection()->beginTransaction();
         }
     }
@@ -297,8 +306,9 @@ class Database
      */
     public function closeTransaction()
     {
-        if ($this->getConnection()->inTransaction()) {
+        if ($this->inTransaction) {
             $this->getConnection()->commit();
+            $this->inTransaction = false;
         }
     }
 
@@ -309,8 +319,9 @@ class Database
      */
     public function cancelTransaction()
     {
-        if ($this->getConnection()->inTransaction()) {
+        if ($this->inTransaction) {
             $this->getConnection()->rollBack();
+            $this->inTransaction = false;
         }
     }
 

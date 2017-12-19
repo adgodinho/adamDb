@@ -11,6 +11,21 @@ require_once dirname(__FILE__).'/BaseBuilder.php';
 class InsertBuilder extends BaseBuilder
 {
     /**
+     * Get object instance
+     *
+     * @static
+     * @access public
+     * @param  Database         $db
+     * @param  ConditionBuilder $condition
+     * @return static
+     */
+    public static function getInstance(Database $db, ConditionBuilder $condition)
+    {
+        $class = get_class();
+        return new $class($db, $condition);
+    }
+
+    /**
      * Build SQL
      *
      * @access public

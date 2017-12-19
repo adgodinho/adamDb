@@ -43,21 +43,6 @@ abstract class BaseBuilder
     }
 
     /**
-     * Get object instance
-     *
-     * @static
-     * @access public
-     * @param  Database         $db
-     * @param  ConditionBuilder $condition
-     * @return static
-     */
-    public static function getInstance(Database $db, ConditionBuilder $condition)
-    {
-        $class = get_class($this);
-        return new $class($db, $condition);
-    }
-
-    /**
      * Set table name
      *
      * @access public
