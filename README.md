@@ -369,9 +369,9 @@ $db->table('mytable')
        ->findAll();
 ```
 
-### Like condition
+~~### Like condition~~ [DISABLED]
 
-Case-sensitive (only Mysql and Postgres):
+~~Case-sensitive (only Mysql and Postgres):~~
 
 ```php
 $db->table('mytable')

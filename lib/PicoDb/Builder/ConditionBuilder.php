@@ -228,7 +228,7 @@ class ConditionBuilder
      * @param  string   $column
      * @param  mixed    $value
      */
-    public function like($column, $value)
+    private function like($column, $value)
     {
         $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ?');
         $this->values[] = $value;

@@ -40,6 +40,7 @@ Thumbs.db
 
 # App specific #
 ################
+index.php
 example.php
 vendorindex.php
 sftp-config.json
