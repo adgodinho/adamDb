@@ -344,6 +344,21 @@ class Table
     }
 
     /**
+     * Build a subquery from a Table query with an alias
+     *
+     * @access public
+     * @param  Table  $subquery
+     * @param  string  $alias
+     * @return $this
+     */
+    public function addSubquery(Table $subquery, $alias)
+    {
+        $this->columns[] = '('.$subquery->buildSelectQuery().') AS '.$this->db->escapeIdentifier($alias);
+        $this->conditionBuilder->addValues($subquery->conditionBuilder->getValues());
+        return $this;
+    }
+
+    /**
      * Exists
      *
      * @access public

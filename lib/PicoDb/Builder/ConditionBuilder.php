@@ -85,6 +85,17 @@ class ConditionBuilder
     }
 
     /**
+     * Add condition values
+     *
+     * @access public
+     * @return array
+     */
+    public function addValues(array $newValues)
+    {
+        $this->values = array_merge($this->values, $newValues);
+    }
+
+    /**
      * Returns true if there is some conditions
      *
      * @access public
