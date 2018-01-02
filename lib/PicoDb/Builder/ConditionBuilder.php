@@ -44,7 +44,7 @@ class ConditionBuilder
     private $orConditions = array();
 
     /**
-     * SQL condition offset
+     * SQL or condition offset
      *
      * @access private
      * @var int
@@ -52,14 +52,39 @@ class ConditionBuilder
     private $orConditionOffset = 0;
 
     /**
+     * SQL CASE conditions
+     *
+     * @access private
+     * @var    OrConditionBuilder[]
+     */
+    private $caseConditions = array();
+
+    /**
+     * SQL case condition offset
+     *
+     * @access private
+     * @var int
+     */
+    private $caseConditionOffset = 0;
+
+    /**
+     * Use CASE or not?
+     *
+     * @access private
+     * @var    boolean
+     */
+    private $case;
+
+    /**
      * Constructor
      *
      * @access public
      * @param  Database  $db
      */
-    public function __construct(Database $db)
+    public function __construct(Database $db, $case = false)
     {
         $this->db = $db;
+        $this->case = $case;
     }
 
     /**
@@ -69,8 +94,12 @@ class ConditionBuilder
      * @return string
      */
     public function build()
-    {
-        return empty($this->conditions) ? '' : ' WHERE '.implode(' AND ', $this->conditions);
+    {   
+        if($this->case) {
+            return empty($this->conditions) ? '' : ' '.implode(' AND ', $this->conditions);
+        } else {
+            return empty($this->conditions) ? '' : ' WHERE '.implode(' AND ', $this->conditions);
+        }
     }
 
     /**
@@ -116,8 +145,9 @@ class ConditionBuilder
     {
         if ($this->orConditionOffset > 0) {
             $this->orConditions[$this->orConditionOffset]->withCondition($sql);
-        }
-        else {
+        } else if ($this->caseConditionOffset > 0) {
+            $this->caseConditions[$this->caseConditionOffset]->withCondition($sql);
+        } else {
             $this->conditions[] = $sql;
         }
     }
@@ -151,16 +181,93 @@ class ConditionBuilder
     }
 
     /**
+     * Start CASE condition
+     *
+     * @access public
+     */
+    public function beginCase()
+    {
+        $this->caseConditionOffset++;
+        $this->caseConditions[$this->caseConditionOffset] = new CaseConditionBuilder();
+    }
+
+    /**
+     * Close CASE condition
+     *
+     * @access public
+     */
+    public function closeCase($alias)
+    {
+        if(is_null($alias)) {
+            $this->addCondition('END )');
+        } else {
+            $this->addCondition('END ) AS '.$this->db->escapeIdentifier($alias));
+        }
+
+        $condition = $this->caseConditions[$this->caseConditionOffset]->build();
+        $this->caseConditionOffset--;
+
+        if ($this->caseConditionOffset > 0) {
+            $this->caseConditions[$this->caseConditionOffset]->withCondition($condition);
+        } else {
+            $this->conditions[] = $condition;
+        }
+    }
+
+    /**
+     * Start CASE WHEN condition
+     *
+     * @access public
+     */
+    public function caseWhen()
+    {
+        $this->addCondition(' WHEN ');
+    }
+
+    /**
+     * Start CASE WHEN condition
+     *
+     * @access public
+     */
+    public function caseThen($value = NULL, $prepared = true)
+    {
+        if(is_null($value)) {
+            $this->addCondition(' THEN ');
+        } else {
+            if($prepared) {
+                $this->addCondition(' THEN ? ');
+                $this->values[] = $value;
+            } else {
+                $this->addCondition(' THEN '.$this->db->escapeIdentifier($value).' ');
+            }
+        }
+    }
+
+    public function caseElse($value = '', $prepared = true)
+    {
+        if($prepared) {
+            $this->addCondition(' ELSE ? ');
+            $this->values[] = $value;
+        } else {
+            $this->addCondition(' ELSE '.$this->db->escapeIdentifier($value).' ');
+        }
+    }
+
+    /**
      * Equal condition
      *
      * @access public
      * @param  string   $column
      * @param  mixed    $value
      */
-    public function eq($column, $value)
+    public function eq($column, $value, $prepared = true)
     {
-        $this->addCondition($this->db->escapeIdentifier($column).' = ?');
-        $this->values[] = $value;
+        if($prepared) {
+            $this->addCondition($this->db->escapeIdentifier($column).' = ?');
+            $this->values[] = $value;
+        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' = '.$this->db->escapeIdentifier($value));
+        }
     }
 
     /**
@@ -170,10 +277,14 @@ class ConditionBuilder
      * @param  string   $column
      * @param  mixed    $value
      */
-    public function neq($column, $value)
+    public function neq($column, $value, $prepared = true)
     {
-        $this->addCondition($this->db->escapeIdentifier($column).' != ?');
-        $this->values[] = $value;
+        if($prepared) {
+            $this->addCondition($this->db->escapeIdentifier($column).' != ?');
+            $this->values[] = $value;
+        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' != '.$this->db->escapeIdentifier($value));
+        }
     }
 
     /**
@@ -183,11 +294,15 @@ class ConditionBuilder
      * @param  string   $column
      * @param  array    $values
      */
-    public function in($column, array $values)
+    public function in($column, array $values, $prepared = true)
     {
-        if (! empty($values)) {
-            $this->addCondition($this->db->escapeIdentifier($column).' IN ('.implode(', ', array_fill(0, count($values), '?')).')');
-            $this->values = array_merge($this->values, $values);
+        if ($prepared) {
+            if (! empty($values)) {
+                $this->addCondition($this->db->escapeIdentifier($column).' IN ('.implode(', ', array_fill(0, count($values), '?')).')');
+                $this->values = array_merge($this->values, $values);
+            }
+        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' IN ('.$this->db->escapeIdentifier(implode(', ', $values)).')');
         }
     }
 
@@ -211,11 +326,15 @@ class ConditionBuilder
      * @param  string   $column
      * @param  array    $values
      */
-    public function notIn($column, array $values)
+    public function notIn($column, array $values, $prepared = true)
     {
-        if (! empty($values)) {
-            $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.implode(', ', array_fill(0, count($values), '?')).')');
-            $this->values = array_merge($this->values, $values);
+        if($prepared) {
+            if (! empty($values)) {
+                $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.implode(', ', array_fill(0, count($values), '?')).')');
+                $this->values = array_merge($this->values, $values);
+            }
+        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.$this->db->escapeIdentifier(implode(', ', $values)).')');
         }
     }
 
@@ -233,16 +352,40 @@ class ConditionBuilder
     }
 
     /**
+     * Build a subquery from a Table query with an alias
+     *
+     * @access public
+     * @param  Table  $subquery
+     * @param  string  $alias
+     * @return $this
+     */
+    public function addSubquery(Table $subquery, $alias = NULL)
+    {
+        if(is_null($alias)) {
+            $this->addCondition('('.$subquery->buildSelectQuery().')');
+        } else {
+            $this->addCondition('('.$subquery->buildSelectQuery().') AS '.$this->db->escapeIdentifier($alias));
+        }
+
+        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
+        return $this;
+    }
+
+    /**
      * LIKE condition
      *
      * @access public
      * @param  string   $column
      * @param  mixed    $value
      */
-    private function like($column, $value)
+    private function like($column, $value, $prepared = true)
     {
-        $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ?');
-        $this->values[] = $value;
+        if($prepared) {
+            $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ?');
+            $this->values[] = $value;
+        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' '.$this->db->escapeIdentifier($value));
+        }
     }
 
     /**
@@ -252,10 +395,14 @@ class ConditionBuilder
      * @param  string   $column
      * @param  mixed    $value
      */
-    public function ilike($column, $value)
+    public function ilike($column, $value, $prepared = true)
     {
-        $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ?');
-        $this->values[] = $value;
+        if($prepared) {
+            $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ?');
+            $this->values[] = $value;
+        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' '.$this->db->escapeIdentifier($value));
+        }
     }
 
     /**
@@ -265,10 +412,14 @@ class ConditionBuilder
      * @param  string   $column
      * @param  mixed    $value
      */
-    public function gt($column, $value)
+    public function gt($column, $value, $prepared = true)
     {
-        $this->addCondition($this->db->escapeIdentifier($column).' > ?');
-        $this->values[] = $value;
+        if($prepared) {
+            $this->addCondition($this->db->escapeIdentifier($column).' > ?');
+            $this->values[] = $value;
+        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' > '.$this->db->escapeIdentifier($value));
+        }
     }
 
     /**
@@ -291,10 +442,14 @@ class ConditionBuilder
      * @param  string   $column
      * @param  mixed    $value
      */
-    public function lt($column, $value)
+    public function lt($column, $value, $prepared = true)
     {
-        $this->addCondition($this->db->escapeIdentifier($column).' < ?');
-        $this->values[] = $value;
+        if($prepared) {
+            $this->addCondition($this->db->escapeIdentifier($column).' < ?');
+            $this->values[] = $value;
+        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' < '.$this->db->escapeIdentifier($value));
+        }
     }
 
     /**
@@ -317,10 +472,14 @@ class ConditionBuilder
      * @param  string   $column
      * @param  mixed    $value
      */
-    public function gte($column, $value)
+    public function gte($column, $value, $prepared = true)
     {
-        $this->addCondition($this->db->escapeIdentifier($column).' >= ?');
-        $this->values[] = $value;
+        if($prepared) {
+            $this->addCondition($this->db->escapeIdentifier($column).' >= ?');
+            $this->values[] = $value;
+        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' >= '.$this->db->escapeIdentifier($value));
+        }
     }
 
     /**
@@ -343,10 +502,14 @@ class ConditionBuilder
      * @param  string   $column
      * @param  mixed    $value
      */
-    public function lte($column, $value)
+    public function lte($column, $value, $prepared = true)
     {
-        $this->addCondition($this->db->escapeIdentifier($column).' <= ?');
-        $this->values[] = $value;
+        if($prepared) {
+            $this->addCondition($this->db->escapeIdentifier($column).' <= ?');
+            $this->values[] = $value;
+        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' <= '.$this->db->escapeIdentifier($value));
+        }
     }
 
     /**

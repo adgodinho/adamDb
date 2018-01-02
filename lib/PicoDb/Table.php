@@ -84,6 +84,14 @@ class Table
     private $sumColumns = array();
 
     /**
+     * SQL top
+     *
+     * @access private
+     * @var    string
+     */
+    private $sqlTop = '';
+
+    /**
      * SQL limit
      *
      * @access private
@@ -130,6 +138,15 @@ class Table
      * @var    boolean
      */
     private $distinct = false;
+
+    /**
+     * Use CASE or not?
+     *
+     * @access private
+     * @var    boolean
+     */
+    private $case = false;
+
 
     /**
      * Group by those columns
@@ -351,10 +368,18 @@ class Table
      * @param  string  $alias
      * @return $this
      */
-    public function addSubquery(Table $subquery, $alias)
+    public function addSubquery(Table $subquery, $alias = NULL)
     {
-        $this->columns[] = '('.$subquery->buildSelectQuery().') AS '.$this->db->escapeIdentifier($alias);
-        $this->conditionBuilder->addValues($subquery->conditionBuilder->getValues());
+        if($this->case) {
+            $this->conditionBuilder->addSubquery($subquery, $alias);
+        } else {
+            if(is_null($alias)) {
+                $this->columns[] = '('.$subquery->buildSelectQuery().')';
+            } else {
+                $this->columns[] = '('.$subquery->buildSelectQuery().') AS '.$this->db->escapeIdentifier($alias);
+            }
+            $this->conditionBuilder->addValues($subquery->conditionBuilder->getValues());
+        }
         return $this;
     }
 
@@ -588,8 +613,14 @@ class Table
      */
     public function limit($value)
     {
-        if (! is_null($value)) {
-            $this->sqlLimit = ' LIMIT '.(int) $value;
+        if($this->db->getDriver() instanceof Mssql) {
+            if (! is_null($value)) {
+                $this->sqlTop = ' TOP ('.(int) $value.') ';
+            }
+        } else {
+            if (! is_null($value)) {
+                $this->sqlLimit = ' LIMIT '.(int) $value;
+            }
         }
 
         return $this;
@@ -649,6 +680,36 @@ class Table
     }
 
     /**
+     * Start CASE condition
+     *
+     * @access public
+     */
+    public function beginCase()
+    {
+        $this->case = true;
+        $this->conditionBuilder = new ConditionBuilder($this->db, $this->case);
+        $this->conditionBuilder->beginCase();
+        return $this;
+    }
+
+    /**
+     * Close CASE condition
+     *
+     * @access public
+     */
+    public function closeCase($alias = NULL)
+    {
+        $this->conditionBuilder->closeCase($alias);
+        array_push($this->columns, $this->conditionBuilder->build());
+        $values = $this->conditionBuilder->getValues();
+
+        $this->conditionBuilder = new ConditionBuilder($this->db);
+        $this->conditionBuilder->addValues($values);
+        $this->case = false;
+        return $this;
+    }
+
+    /**
      * Sum column
      *
      * @access public
@@ -704,7 +765,8 @@ class Table
         $this->groupBy = $this->db->escapeIdentifierList($this->groupBy);
 
         return trim(sprintf(
-            'SELECT %s FROM %s %s %s %s %s %s %s',
+            'SELECT %s %s FROM %s %s %s %s %s %s %s',
+            $this->sqlTop,
             $this->sqlSelect,
             $this->db->escapeIdentifier($this->name),
             implode(' ', $this->joins),
@@ -735,6 +797,6 @@ class Table
      */
      public function __clone()
      {
-         $this->conditionBuilder = clone $this->conditionBuilder;
+        $this->conditionBuilder = clone $this->conditionBuilder;
      }
 }

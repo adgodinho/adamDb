@@ -6,7 +6,7 @@
  * @package PicoDb\Builder
  * @author  Frederic Guillot
  */
-class OrConditionBuilder
+class CaseConditionBuilder
 {
     /**
      * List of SQL conditions
@@ -37,6 +37,6 @@ class OrConditionBuilder
      */
     public function build()
     {
-        return '('.implode(' OR ', $this->conditions).')';
+        return '( CASE '.implode(' ', $this->conditions);
     }
 }
