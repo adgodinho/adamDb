@@ -96,7 +96,7 @@ class Mssql extends Base
      */
     public function escape($identifier)
     {
-        return '['.$identifier.']';
+        return $identifier;
     }
 
     /**
