@@ -388,6 +388,28 @@ class ConditionBuilder
     }
 
     /**
+     * LIKE condition
+     *
+     * @access public
+     * @param  string   $column
+     * @param  mixed    $value
+     */
+    private function notLike($column, $value, $prepared = true)
+    {
+        if($value instanceof Table) {
+            $this->addCondition($this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('LIKE').' ('.$value->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
+        } else {
+            if($prepared) {
+                $this->addCondition($this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('LIKE').' ?');
+                $this->values[] = $value;
+            } else {
+                $this->addCondition($this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('LIKE').' '.$this->db->escapeIdentifier($value));
+            }
+        }
+    }
+
+    /**
      * ILIKE condition
      *
      * @access public
@@ -405,6 +427,28 @@ class ConditionBuilder
                 $this->values[] = $value;
             } else {
                 $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' '.$this->db->escapeIdentifier($value));
+            }
+        }
+    }
+
+        /**
+     * NOT ILIKE condition
+     *
+     * @access public
+     * @param  string   $column
+     * @param  mixed    $value
+     */
+    public function notIlike($column, $value, $prepared = true)
+    {
+        if($value instanceof Table) {
+            $this->addCondition($this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('ILIKE').' ('.$value->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
+        } else {
+            if($prepared) {
+                $this->addCondition($this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('ILIKE').' ?');
+                $this->values[] = $value;
+            } else {
+                $this->addCondition($this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('ILIKE').' '.$this->db->escapeIdentifier($value));
             }
         }
     }
