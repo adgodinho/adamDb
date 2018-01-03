@@ -271,6 +271,19 @@ class ConditionBuilder
     }
 
     /**
+     * Equal with subquery
+     *
+     * @access public
+     * @param  string   $column
+     * @param  Table    $subquery
+     */
+    public function eqSubquery($column, Table $subquery)
+    {
+        $this->addCondition($this->db->escapeIdentifier($column).' = ('.$subquery->buildSelectQuery().')');
+        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
+    }
+
+    /**
      * Not equal condition
      *
      * @access public
@@ -285,6 +298,19 @@ class ConditionBuilder
         } else {
             $this->addCondition($this->db->escapeIdentifier($column).' != '.$this->db->escapeIdentifier($value));
         }
+    }
+
+    /**
+     * Not equal with subquery
+     *
+     * @access public
+     * @param  string   $column
+     * @param  Table    $subquery
+     */
+    public function neqSubquery($column, Table $subquery)
+    {
+        $this->addCondition($this->db->escapeIdentifier($column).' != ('.$subquery->buildSelectQuery().')');
+        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
     }
 
     /**
@@ -389,6 +415,19 @@ class ConditionBuilder
     }
 
     /**
+     * LIKE with subquery
+     *
+     * @access public
+     * @param  string   $column
+     * @param  Table    $subquery
+     */
+    public function likeSubquery($column, Table $subquery)
+    {
+        $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ('.$subquery->buildSelectQuery().')');
+        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
+    }
+
+    /**
      * ILIKE condition
      *
      * @access public
@@ -403,6 +442,19 @@ class ConditionBuilder
         } else {
             $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' '.$this->db->escapeIdentifier($value));
         }
+    }
+
+    /**
+     * ILIKE with subquery
+     *
+     * @access public
+     * @param  string   $column
+     * @param  Table    $subquery
+     */
+    public function ilikeSubquery($column, Table $subquery)
+    {
+        $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ('.$subquery->buildSelectQuery().')');
+        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
     }
 
     /**
