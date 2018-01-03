@@ -262,11 +262,16 @@ class ConditionBuilder
      */
     public function eq($column, $value, $prepared = true)
     {
-        if($prepared) {
-            $this->addCondition($this->db->escapeIdentifier($column).' = ?');
-            $this->values[] = $value;
+        if($value instanceof Table) {
+            $this->addCondition($this->db->escapeIdentifier($column).' = ('.$value->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($column).' = '.$this->db->escapeIdentifier($value));
+            if($prepared) {
+                $this->addCondition($this->db->escapeIdentifier($column).' = ?');
+                $this->values[] = $value;
+            } else {
+                $this->addCondition($this->db->escapeIdentifier($column).' = '.$this->db->escapeIdentifier($value));
+            }
         }
     }
 
