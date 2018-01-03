@@ -304,12 +304,12 @@ class ConditionBuilder
      * @param  string   $column
      * @param  array    $values
      */
-    public function in($column, array $values, $prepared = true)
+    public function in($column, $values, $prepared = true)
     {
         if($value instanceof Table) {
-            $this->addCondition($this->db->escapeIdentifier($column).' IN ('.$value->buildSelectQuery().')');
-            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
-        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' IN ('.$values->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $values->getConditionBuilder()->getValues());
+        } elseif(is_array($values)) {
             if ($prepared) {
                 if (! empty($values)) {
                     $this->addCondition($this->db->escapeIdentifier($column).' IN ('.implode(', ', array_fill(0, count($values), '?')).')');
@@ -328,12 +328,12 @@ class ConditionBuilder
      * @param  string   $column
      * @param  array    $values
      */
-    public function notIn($column, array $values, $prepared = true)
+    public function notIn($column, $values, $prepared = true)
     {
         if($value instanceof Table) {
-            $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.$value->buildSelectQuery().')');
-            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
-        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.$values->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $values->getConditionBuilder()->getValues());
+        } elseif(is_array($values)) {
             if($prepared) {
                 if (! empty($values)) {
                     $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.implode(', ', array_fill(0, count($values), '?')).')');
@@ -506,9 +506,10 @@ class ConditionBuilder
     public function isNull($column)
     {
         if($value instanceof Table) {
-            
+            $this->addCondition('('.$value->buildSelectQuery().') IS NULL');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($column).' IS NULL');
+            $this->addCondition($this->db->escapeIdentifier($value).' IS NULL');
         }
     }
 
@@ -518,12 +519,13 @@ class ConditionBuilder
      * @access public
      * @param  string   $column
      */
-    public function notNull($column)
+    public function notNull($value)
     {
         if($value instanceof Table) {
-            
+            $this->addCondition('('.$value->buildSelectQuery().') IS NOT NULL');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($column).' IS NOT NULL');
+            $this->addCondition($this->db->escapeIdentifier($value).' IS NOT NULL');
         }
     }
 }
