@@ -136,16 +136,6 @@ use PicoDb\Database;
 $db = new Database(UrlParser::getInstance()->getSettings('postgres://user:pass@hostname:6212/db'));
 ```
 
-### Execute any SQL query
-
-```php
-$db->execute('CREATE TABLE mytable (column1 TEXT)');
-```
-
-- Returns a `PDOStatement` if successful
-- Returns `false` if there is a duplicate key error
-- Throws a `SQLException` for other errors
-
 ### Insertion
 
 ```php
