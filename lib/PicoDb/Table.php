@@ -491,65 +491,17 @@ class Table
      * @param  string   $table              Join table
      * @param  string   $foreign_column     Foreign key on the join table
      * @param  string   $local_column       Local column
-     * @param  string   $local_table        Local table
-     * @param  string   $alias              Join table alias
+     * @param  string   $type               Join table type (LEFT, INNER, RIGHT)
      * @return $this
      */
-    public function join($table, $foreign_column, $local_column, $local_table = '', $alias = '')
+    public function join($table, $foreign_column, $local_column, $type = 'INNER')
     {
         $this->joins[] = sprintf(
-            'LEFT JOIN %s ON %s=%s',
+            '%s JOIN %s ON %s=%s',
+            $this->db->escapeIdentifier(strtoupper($type)),
             $this->db->escapeIdentifier($table),
-            $this->db->escapeIdentifier($alias ? $alias : $table).'.'.$this->db->escapeIdentifier($foreign_column),
-            $this->db->escapeIdentifier($local_table ? $local_table : $this->name).'.'.$this->db->escapeIdentifier($local_column)
-        );
-
-        return $this;
-    }
-
-    /**
-     * Left join
-     *
-     * @access public
-     * @param  string   $table1
-     * @param  string   $alias1
-     * @param  string   $column1
-     * @param  string   $table2
-     * @param  string   $column2
-     * @return $this
-     */
-    public function left($table1, $alias1, $column1, $table2, $column2)
-    {
-        $this->joins[] = sprintf(
-            'LEFT JOIN %s AS %s ON %s=%s',
-            $this->db->escapeIdentifier($table1),
-            $this->db->escapeIdentifier($alias1),
-            $this->db->escapeIdentifier($alias1).'.'.$this->db->escapeIdentifier($column1),
-            $this->db->escapeIdentifier($table2).'.'.$this->db->escapeIdentifier($column2)
-        );
-
-        return $this;
-    }
-
-    /**
-     * Inner join
-     *
-     * @access public
-     * @param  string   $table1
-     * @param  string   $alias1
-     * @param  string   $column1
-     * @param  string   $table2
-     * @param  string   $column2
-     * @return $this
-     */
-    public function inner($table1, $alias1, $column1, $table2, $column2)
-    {
-        $this->joins[] = sprintf(
-            'JOIN %s AS %s ON %s=%s',
-            $this->db->escapeIdentifier($table1),
-            $this->db->escapeIdentifier($alias1),
-            $this->db->escapeIdentifier($alias1).'.'.$this->db->escapeIdentifier($column1),
-            $this->db->escapeIdentifier($table2).'.'.$this->db->escapeIdentifier($column2)
+            $this->db->escapeIdentifier($foreign_column),
+            $this->db->escapeIdentifier($local_column)
         );
 
         return $this;

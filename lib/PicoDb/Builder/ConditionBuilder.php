@@ -276,19 +276,6 @@ class ConditionBuilder
     }
 
     /**
-     * Equal with subquery
-     *
-     * @access public
-     * @param  string   $column
-     * @param  Table    $subquery
-     */
-    public function eqSubquery($column, Table $subquery)
-    {
-        $this->addCondition($this->db->escapeIdentifier($column).' = ('.$subquery->buildSelectQuery().')');
-        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
-    }
-
-    /**
      * Not equal condition
      *
      * @access public
@@ -297,25 +284,17 @@ class ConditionBuilder
      */
     public function neq($column, $value, $prepared = true)
     {
-        if($prepared) {
-            $this->addCondition($this->db->escapeIdentifier($column).' != ?');
-            $this->values[] = $value;
-        } else {
-            $this->addCondition($this->db->escapeIdentifier($column).' != '.$this->db->escapeIdentifier($value));
+        if($value instanceof Table) {
+            $this->addCondition($this->db->escapeIdentifier($column).' != ('.$value->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
+        } else{
+            if($prepared) {
+                $this->addCondition($this->db->escapeIdentifier($column).' != ?');
+                $this->values[] = $value;
+            } else {
+                $this->addCondition($this->db->escapeIdentifier($column).' != '.$this->db->escapeIdentifier($value));
+            }
         }
-    }
-
-    /**
-     * Not equal with subquery
-     *
-     * @access public
-     * @param  string   $column
-     * @param  Table    $subquery
-     */
-    public function neqSubquery($column, Table $subquery)
-    {
-        $this->addCondition($this->db->escapeIdentifier($column).' != ('.$subquery->buildSelectQuery().')');
-        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
     }
 
     /**
@@ -327,27 +306,19 @@ class ConditionBuilder
      */
     public function in($column, array $values, $prepared = true)
     {
-        if ($prepared) {
-            if (! empty($values)) {
-                $this->addCondition($this->db->escapeIdentifier($column).' IN ('.implode(', ', array_fill(0, count($values), '?')).')');
-                $this->values = array_merge($this->values, $values);
-            }
+        if($value instanceof Table) {
+            $this->addCondition($this->db->escapeIdentifier($column).' IN ('.$value->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($column).' IN ('.$this->db->escapeIdentifier(implode(', ', $values)).')');
+            if ($prepared) {
+                if (! empty($values)) {
+                    $this->addCondition($this->db->escapeIdentifier($column).' IN ('.implode(', ', array_fill(0, count($values), '?')).')');
+                    $this->values = array_merge($this->values, $values);
+                }
+            } else {
+                $this->addCondition($this->db->escapeIdentifier($column).' IN ('.$this->db->escapeIdentifier(implode(', ', $values)).')');
+            }
         }
-    }
-
-    /**
-     * IN condition with a subquery
-     *
-     * @access public
-     * @param  string   $column
-     * @param  Table    $subquery
-     */
-    public function inSubquery($column, Table $subquery)
-    {
-        $this->addCondition($this->db->escapeIdentifier($column).' IN ('.$subquery->buildSelectQuery().')');
-        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
     }
 
     /**
@@ -359,27 +330,19 @@ class ConditionBuilder
      */
     public function notIn($column, array $values, $prepared = true)
     {
-        if($prepared) {
-            if (! empty($values)) {
-                $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.implode(', ', array_fill(0, count($values), '?')).')');
-                $this->values = array_merge($this->values, $values);
-            }
+        if($value instanceof Table) {
+            $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.$value->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.$this->db->escapeIdentifier(implode(', ', $values)).')');
+            if($prepared) {
+                if (! empty($values)) {
+                    $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.implode(', ', array_fill(0, count($values), '?')).')');
+                    $this->values = array_merge($this->values, $values);
+                }
+            } else {
+                $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.$this->db->escapeIdentifier(implode(', ', $values)).')');
+            }
         }
-    }
-
-    /**
-     * NOT IN condition with a subquery
-     *
-     * @access public
-     * @param  string   $column
-     * @param  Table    $subquery
-     */
-    public function notInSubquery($column, Table $subquery)
-    {
-        $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.$subquery->buildSelectQuery().')');
-        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
     }
 
     /**
@@ -411,25 +374,17 @@ class ConditionBuilder
      */
     private function like($column, $value, $prepared = true)
     {
-        if($prepared) {
-            $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ?');
-            $this->values[] = $value;
+        if($value instanceof Table) {
+            $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ('.$value->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' '.$this->db->escapeIdentifier($value));
+            if($prepared) {
+                $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ?');
+                $this->values[] = $value;
+            } else {
+                $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' '.$this->db->escapeIdentifier($value));
+            }
         }
-    }
-
-    /**
-     * LIKE with subquery
-     *
-     * @access public
-     * @param  string   $column
-     * @param  Table    $subquery
-     */
-    public function likeSubquery($column, Table $subquery)
-    {
-        $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ('.$subquery->buildSelectQuery().')');
-        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
     }
 
     /**
@@ -441,25 +396,17 @@ class ConditionBuilder
      */
     public function ilike($column, $value, $prepared = true)
     {
-        if($prepared) {
-            $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ?');
-            $this->values[] = $value;
+        if($value instanceof Table) {
+            $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ('.$value->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' '.$this->db->escapeIdentifier($value));
+            if($prepared) {
+                $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ?');
+                $this->values[] = $value;
+            } else {
+                $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' '.$this->db->escapeIdentifier($value));
+            }
         }
-    }
-
-    /**
-     * ILIKE with subquery
-     *
-     * @access public
-     * @param  string   $column
-     * @param  Table    $subquery
-     */
-    public function ilikeSubquery($column, Table $subquery)
-    {
-        $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ('.$subquery->buildSelectQuery().')');
-        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
     }
 
     /**
@@ -471,25 +418,17 @@ class ConditionBuilder
      */
     public function gt($column, $value, $prepared = true)
     {
-        if($prepared) {
-            $this->addCondition($this->db->escapeIdentifier($column).' > ?');
-            $this->values[] = $value;
+        if($value instanceof Table) {
+            $this->addCondition($this->db->escapeIdentifier($column).' > ('.$value->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($column).' > '.$this->db->escapeIdentifier($value));
+            if($prepared) {
+                $this->addCondition($this->db->escapeIdentifier($column).' > ?');
+                $this->values[] = $value;
+            } else {
+                $this->addCondition($this->db->escapeIdentifier($column).' > '.$this->db->escapeIdentifier($value));
+            }
         }
-    }
-
-    /**
-     * Greater than condition with subquery
-     *
-     * @access public
-     * @param  string   $column
-     * @param  Table    $subquery
-     */
-    public function gtSubquery($column, Table $subquery)
-    {
-        $this->addCondition($this->db->escapeIdentifier($column).' > ('.$subquery->buildSelectQuery().')');
-        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
     }
 
     /**
@@ -501,25 +440,17 @@ class ConditionBuilder
      */
     public function lt($column, $value, $prepared = true)
     {
-        if($prepared) {
-            $this->addCondition($this->db->escapeIdentifier($column).' < ?');
-            $this->values[] = $value;
+        if($value instanceof Table) {
+            $this->addCondition($this->db->escapeIdentifier($column).' < ('.$value->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($column).' < '.$this->db->escapeIdentifier($value));
+            if($prepared) {
+                $this->addCondition($this->db->escapeIdentifier($column).' < ?');
+                $this->values[] = $value;
+            } else {
+                $this->addCondition($this->db->escapeIdentifier($column).' < '.$this->db->escapeIdentifier($value));
+            }
         }
-    }
-
-    /**
-     * Lower than condition with subquery
-     *
-     * @access public
-     * @param  string   $column
-     * @param  Table    $subquery
-     */
-    public function ltSubquery($column, Table $subquery)
-    {
-        $this->addCondition($this->db->escapeIdentifier($column).' < ('.$subquery->buildSelectQuery().')');
-        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
     }
 
     /**
@@ -531,25 +462,17 @@ class ConditionBuilder
      */
     public function gte($column, $value, $prepared = true)
     {
-        if($prepared) {
-            $this->addCondition($this->db->escapeIdentifier($column).' >= ?');
-            $this->values[] = $value;
+        if($value instanceof Table) {
+            $this->addCondition($this->db->escapeIdentifier($column).' >= ('.$value->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($column).' >= '.$this->db->escapeIdentifier($value));
+            if($prepared) {
+                $this->addCondition($this->db->escapeIdentifier($column).' >= ?');
+                $this->values[] = $value;
+            } else {
+                $this->addCondition($this->db->escapeIdentifier($column).' >= '.$this->db->escapeIdentifier($value));
+            }
         }
-    }
-
-    /**
-     * Greater than or equal condition with subquery
-     *
-     * @access public
-     * @param  string   $column
-     * @param  Table    $subquery
-     */
-    public function gteSubquery($column, Table $subquery)
-    {
-        $this->addCondition($this->db->escapeIdentifier($column).' >= ('.$subquery->buildSelectQuery().')');
-        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
     }
 
     /**
@@ -561,25 +484,17 @@ class ConditionBuilder
      */
     public function lte($column, $value, $prepared = true)
     {
-        if($prepared) {
-            $this->addCondition($this->db->escapeIdentifier($column).' <= ?');
-            $this->values[] = $value;
+        if($value instanceof Table) {
+            $this->addCondition($this->db->escapeIdentifier($column).' <= ('.$value->buildSelectQuery().')');
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($column).' <= '.$this->db->escapeIdentifier($value));
+            if($prepared) {
+                $this->addCondition($this->db->escapeIdentifier($column).' <= ?');
+                $this->values[] = $value;
+            } else {
+                $this->addCondition($this->db->escapeIdentifier($column).' <= '.$this->db->escapeIdentifier($value));
+            }
         }
-    }
-
-    /**
-     * Lower than or equal condition with subquery
-     *
-     * @access public
-     * @param  string   $column
-     * @param  Table    $subquery
-     */
-    public function lteSubquery($column, Table $subquery)
-    {
-        $this->addCondition($this->db->escapeIdentifier($column).' <= ('.$subquery->buildSelectQuery().')');
-        $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
     }
 
     /**
@@ -590,7 +505,11 @@ class ConditionBuilder
      */
     public function isNull($column)
     {
-        $this->addCondition($this->db->escapeIdentifier($column).' IS NULL');
+        if($value instanceof Table) {
+            
+        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' IS NULL');
+        }
     }
 
     /**
@@ -601,6 +520,10 @@ class ConditionBuilder
      */
     public function notNull($column)
     {
-        $this->addCondition($this->db->escapeIdentifier($column).' IS NOT NULL');
+        if($value instanceof Table) {
+            
+        } else {
+            $this->addCondition($this->db->escapeIdentifier($column).' IS NOT NULL');
+        }
     }
 }
