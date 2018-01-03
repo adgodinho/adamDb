@@ -621,7 +621,7 @@ class Table
      * @param  Table   $subquery
      * @return $this
      */
-    public function uninon(Table $subquery)
+    public function union(Table $subquery)
     {
         $this->sqlUnion = ' UNION '.$subquery->buildSelectQuery();
         $this->conditionBuilder->addValues($subquery->conditionBuilder->getValues());
