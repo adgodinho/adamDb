@@ -6,10 +6,14 @@ require_once dirname(__FILE__).'/Driver/Mysql.php';
 require_once dirname(__FILE__).'/Driver/Postgres.php';
 require_once dirname(__FILE__).'/Builder/OrConditionBuilder.php';
 require_once dirname(__FILE__).'/Builder/CaseConditionBuilder.php';
-
-function __autoload($class_name) {
-    require_once($class_name.'.php');
-}
+require_once dirname(__FILE__).'/DriverFactory.php';
+require_once dirname(__FILE__).'/Table.php';
+require_once dirname(__FILE__).'/Hashtable.php';
+require_once dirname(__FILE__).'/LargeObject.php';
+require_once dirname(__FILE__).'/Schema.php';
+require_once dirname(__FILE__).'/SQLException.php';
+require_once dirname(__FILE__).'/StatementHandler.php';
+require_once dirname(__FILE__).'/UrlParser.php';
 
 /**
  * Database

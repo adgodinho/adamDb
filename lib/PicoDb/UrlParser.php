@@ -36,7 +36,8 @@ class UrlParser
      */
     public static function getInstance($environmentVariable = 'DATABASE_URL')
     {
-        return new static($environmentVariable);
+        $class = get_class();
+        return new $class($environmentVariable);
     }
 
     /**
