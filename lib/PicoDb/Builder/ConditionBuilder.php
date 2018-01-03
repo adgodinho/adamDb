@@ -302,7 +302,7 @@ class ConditionBuilder
      *
      * @access public
      * @param  string   $column
-     * @param  array    $values
+     * @param  mixed    $values
      */
     public function in($column, $values, $prepared = true)
     {
@@ -326,7 +326,7 @@ class ConditionBuilder
      *
      * @access public
      * @param  string   $column
-     * @param  array    $values
+     * @param  mixed    $values
      */
     public function notIn($column, $values, $prepared = true)
     {
@@ -501,9 +501,9 @@ class ConditionBuilder
      * IS NULL condition
      *
      * @access public
-     * @param  string   $column
+     * @param  mixed   $value
      */
-    public function isNull($column)
+    public function isNull($value)
     {
         if($value instanceof Table) {
             $this->addCondition('('.$value->buildSelectQuery().') IS NULL');
@@ -517,7 +517,7 @@ class ConditionBuilder
      * IS NOT NULL condition
      *
      * @access public
-     * @param  string   $column
+     * @param  mixed  $value
      */
     public function notNull($value)
     {
