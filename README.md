@@ -272,6 +272,43 @@ $db->table('mytable')->findOneColumn('column1');
 $db->table('mytable')->select(1)->eq('id', 42)->findOne();
 ```
 
+### Select subquery
+
+```php
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')
+       ->columns('column_5')
+       ->addSubquery($subquery)
+       ->findAll();
+```
+
+### Case
+
+```php
+$pg->table("mytable")
+   ->beginCase()
+   ->caseWhen()
+   ->lt('columnA', '10')
+   ->caseThen('0')
+   ->caseElse('1')
+   ->closeCase('result');
+```
+
+or
+
+```php
+$pg->table("mytable")
+   ->beginCase()
+   ->caseWhen()
+   ->lt('columnA', '10')
+   ->caseThen()
+   ->addSubquery($subquery1)
+   ->caseElse()
+   ->addSubquery($subquery2)
+   ->closeCase('result');
+```
+
 ### Distinct
 
 ```php
@@ -378,6 +415,8 @@ $db->table('mytable')
    ->like('column1', '%Foo%')
    ->findAll();
 ```
+
+### Ilike condition
 
 Not case-sensitive:
 
