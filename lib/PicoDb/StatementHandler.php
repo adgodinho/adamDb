@@ -305,6 +305,14 @@ class StatementHandler
         if ($this->stopwatch) {
             $this->startTime = microtime(true);
         }
+
+        if ($this->debug) {
+            echo "<br><hr>", $this->sql;
+            if (!empty($this->positionalParams)) {
+                echo "<code><br>", print_r($this->positionalParams, true), "</code>";
+            }
+            echo "<hr>";
+        }
     }
 
     /**
@@ -324,15 +332,7 @@ class StatementHandler
         if ($this->explain) {
             $this->db->setLogMessages($this->db->getDriver()->explain($this->sql, $this->positionalParams));
         }
-
-        if ($this->debug) {
-            echo "<br><hr>", $this->sql;
-            if (!empty($this->positionalParams)) {
-                echo "<code><br>", print_r($this->positionalParams, true), "</code>";
-            }
-            echo "<hr>";
-        }
-
+        
         $this->nbQueries++;
         $this->cleanup();
     }
