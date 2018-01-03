@@ -306,7 +306,7 @@ class ConditionBuilder
      */
     public function in($column, $values, $prepared = true)
     {
-        if($value instanceof Table) {
+        if($values instanceof Table) {
             $this->addCondition($this->db->escapeIdentifier($column).' IN ('.$values->buildSelectQuery().')');
             $this->values = array_merge($this->values, $values->getConditionBuilder()->getValues());
         } elseif(is_array($values)) {
@@ -330,7 +330,7 @@ class ConditionBuilder
      */
     public function notIn($column, $values, $prepared = true)
     {
-        if($value instanceof Table) {
+        if($values instanceof Table) {
             $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.$values->buildSelectQuery().')');
             $this->values = array_merge($this->values, $values->getConditionBuilder()->getValues());
         } elseif(is_array($values)) {
