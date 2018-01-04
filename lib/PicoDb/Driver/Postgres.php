@@ -95,6 +95,36 @@ class Postgres extends Base
     }
 
     /**
+     * Cast value
+     *
+     * @access public
+     * @param  string  $value
+     * @param  string  $type
+     * @return string
+     */
+    public function cast($value, $type, $option = NULL)
+    {
+        $value = strtolower($value);
+        switch ($type) {
+            case 'int':
+                return 'CAST ('.$value.' AS INTEGER)';
+                break;
+            case 'double':
+                return 'CAST ('.$value.' AS DOUBLE)';
+                break;
+            case 'varchar':
+                if(is_null($option)) {
+                    return 'CAST ('.$value.' AS VARCHAR)';
+                } else {
+                    return 'CAST ('.$value.' AS VARCHAR('.$option.'))';
+                }
+            default:
+                return $value;
+                break;
+        }
+    }
+
+    /**
      * Get non standard operator
      *
      * @access public

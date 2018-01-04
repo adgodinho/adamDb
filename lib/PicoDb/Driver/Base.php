@@ -70,6 +70,17 @@ abstract class Base
     abstract public function escape($identifier);
 
     /**
+     * Cast value
+     *
+     * @abstract
+     * @access public
+     * @param  string  $value
+     * @param  string  $type
+     * @return string
+     */
+    abstract public function cast($value, $type);
+
+    /**
      * Get non standard operator
      *
      * @abstract

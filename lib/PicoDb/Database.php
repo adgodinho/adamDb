@@ -266,6 +266,19 @@ class Database
     }
 
     /**
+     * Cast value
+     *
+     * @access public
+     * @param  string  $value
+     * @param  string  $type
+     * @return string
+     */
+    public function cast($value, $type, $option = NULL)
+    {
+        return $this->driver->cast($value, $type, $option);
+    }
+
+    /**
      * Execute a prepared statement
      *
      * Note: returns false on duplicate keys instead of SQLException

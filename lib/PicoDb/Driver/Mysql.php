@@ -147,6 +147,23 @@ class Mysql extends Base
     }
 
     /**
+     * Cast value
+     *
+     * @access public
+     * @param  string  $value
+     * @param  string  $type
+     * @return string
+     */
+    public function cast($value, $type, $option = NULL)
+    {
+        switch ($type) {
+            default:
+                return $value;
+                break;
+        }
+    }
+
+    /**
      * Get non standard operator
      *
      * @access public
