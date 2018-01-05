@@ -94,7 +94,6 @@ class Sqlite extends Base
     /**
      * Current date value
      *
-     * @abstract
      * @access public
      * @return string
      */
@@ -105,7 +104,6 @@ class Sqlite extends Base
     /**
      * Current timestamp value
      *
-     * @abstract
      * @access public
      * @return string
      */

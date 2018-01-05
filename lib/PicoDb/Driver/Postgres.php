@@ -151,18 +151,16 @@ class Postgres extends Base
     /**
      * Current timestamp value
      *
-     * @abstract
      * @access public
      * @return string
      */
     public function timestamp() {
-        return 'current_timestamp'
+        return 'current_timestamp';
     }
 
     /**
      * Get non standard operator
      *
-     * @access public
      * @param  string  $operator
      * @return string
      */

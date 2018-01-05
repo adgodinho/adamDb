@@ -78,7 +78,7 @@ abstract class Base
      * @param  string  $type
      * @return string
      */
-    abstract public function cast($value, $type, $option);
+    abstract public function cast($value, $type, $option = NULL);
 
     /**
      * Current date value
