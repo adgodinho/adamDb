@@ -92,6 +92,28 @@ class Sqlite extends Base
     }
 
     /**
+     * Current date value
+     *
+     * @abstract
+     * @access public
+     * @return string
+     */
+    public function date() {
+        return "date('now')";
+    }
+    
+    /**
+     * Current timestamp value
+     *
+     * @abstract
+     * @access public
+     * @return string
+     */
+    public function timestamp() {
+        return "datetime(CURRENT_TIMESTAMP, 'localtime')";
+    }
+
+    /**
      * Get non standard operator
      *
      * @access public

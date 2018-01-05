@@ -125,10 +125,44 @@ class Mssql extends Base
                     return 'CAST ('.$value.' AS VARCHAR('.$option.'))';
                 }
                 break;
+            case 'date_iso':
+                return 'CONVERT (VARCHAR, '.$value.', 112)';
+                break;
+            case 'date_br':
+                return 'CONVERT (VARCHAR, '.$value.', 103)';
+                break;
+            case 'to_date_iso':
+                return 'CONVERT (DATETIME, '.$value.', 112)';
+                break;
+            case 'to_date_br':
+                return 'CONVERT (DATETIME, '.$value.', 112)';
+                break;
             default:
                 return $value;
                 break;
         }
+    }
+
+    /**
+     * Current date value
+     *
+     * @abstract
+     * @access public
+     * @return string
+     */
+    public function date() {
+    	return 'CONVERT (date, GETDATE())';
+    }
+	
+	/**
+     * Current timestamp value
+     *
+     * @abstract
+     * @access public
+     * @return string
+     */
+    public function timestamp() {
+    	return 'GETDATE()';
     }
 
     /**

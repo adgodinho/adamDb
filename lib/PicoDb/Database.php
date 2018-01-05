@@ -279,6 +279,28 @@ class Database
     }
 
     /**
+     * Current date value
+     *
+     * @access public
+     * @return string
+     */
+    public function date()
+    {
+        return $this->driver->date();
+    }
+
+    /**
+     * Current timestamp value
+     *
+     * @access public
+     * @return string
+     */
+    public function timestamp()
+    {
+        return $this->driver->timestamp();
+    }
+
+    /**
      * Execute a prepared statement
      *
      * Note: returns false on duplicate keys instead of SQLException

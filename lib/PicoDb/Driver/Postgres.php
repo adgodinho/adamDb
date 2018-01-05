@@ -118,10 +118,45 @@ class Postgres extends Base
                 } else {
                     return 'CAST ('.$value.' AS VARCHAR('.$option.'))';
                 }
+                break;
+            case 'date_iso':
+                return "TO_CHAR(".$value.", 'YYYYMMDD')";
+                break;
+            case 'date_br':
+                return "TO_CHAR(".$value.", 'DD/MM/YYYY')";
+                break;
+            case 'to_date_iso':
+                return "TO_DATE(".$value.", 'YYYYMMDD')";
+                break;
+            case 'to_date_br':
+                return "TO_DATE(".$value.", 'DD/MM/YYYY')";
+                break;
             default:
                 return $value;
                 break;
         }
+    }
+
+    /**
+     * Current date value
+     *
+     * @abstract
+     * @access public
+     * @return string
+     */
+    public function date() {
+        return 'current_date';
+    }
+    
+    /**
+     * Current timestamp value
+     *
+     * @abstract
+     * @access public
+     * @return string
+     */
+    public function timestamp() {
+        return 'current_timestamp'
     }
 
     /**

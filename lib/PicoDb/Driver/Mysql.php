@@ -164,6 +164,28 @@ class Mysql extends Base
     }
 
     /**
+     * Current date value
+     *
+     * @abstract
+     * @access public
+     * @return string
+     */
+    public function date() {
+        return 'CURDATE()';
+    }
+    
+    /**
+     * Current timestamp value
+     *
+     * @abstract
+     * @access public
+     * @return string
+     */
+    public function timestamp() {
+        return 'CURRENT_TIMESTAMP()';
+    }
+
+    /**
      * Get non standard operator
      *
      * @access public

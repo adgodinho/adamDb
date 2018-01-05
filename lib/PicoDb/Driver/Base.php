@@ -78,7 +78,25 @@ abstract class Base
      * @param  string  $type
      * @return string
      */
-    abstract public function cast($value, $type);
+    abstract public function cast($value, $type, $option);
+
+    /**
+     * Current date value
+     *
+     * @abstract
+     * @access public
+     * @return string
+     */
+    abstract public function date();
+
+    /**
+     * Current timestamp value
+     *
+     * @abstract
+     * @access public
+     * @return string
+     */
+    abstract public function timestamp();
 
     /**
      * Get non standard operator
