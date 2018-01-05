@@ -135,7 +135,7 @@ class Mssql extends Base
                 return 'CONVERT (DATETIME, '.$value.', 112)';
                 break;
             case 'to_date_br':
-                return 'CONVERT (DATETIME, '.$value.', 112)';
+                return 'CONVERT (DATETIME, '.$value.', 103)';
                 break;
             default:
                 return $value;
