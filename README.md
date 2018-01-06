@@ -246,6 +246,72 @@ One row:
 $db->table('mytable')->findOneColumn('column1');
 ```
 
+### Cast
+
+```php
+//Int 
+$db->->cast('column_1', 'int');
+
+//Double 
+$db->->cast('column_1', 'double');
+
+//Varchar 
+$db->->cast('column_1', 'varchar');
+
+//Varchar(2)
+$db->->cast('column_1', 'varchar', '2');
+
+//Date ISO varchar('YYYYMMDD')
+$db->->cast('column_1', 'date_iso');
+
+//Date BR varchar('DD/MM/YYYY')
+$db->->cast('column_1', 'date_br');
+
+//Date ISO date('YYYYMMDD')
+$db->->cast('column_1', 'to_date_iso');
+
+//Date BR date('DD/MM/YYYY')
+$db->->cast('column_1', 'to_date_br');
+```
+
+### Current date
+
+```php
+$db->date();
+```
+
+### Current timestamp
+
+```php
+$db->timestamp();
+```
+
+## Date difference
+
+```php
+// Difference in years
+$db->datediff('year', '2011-12-29 23:00:00', '2011-12-31 01:00:00');
+
+// Difference in months
+$db->datediff('month', '2011-12-29 23:00:00', '2011-12-31 01:00:00');
+
+// Difference in weeks
+$db->datediff('week', '2011-12-29 23:00:00', '2011-12-31 01:00:00');
+
+// Difference in days
+$db->datediff('day', '2011-12-29 23:00:00', '2011-12-31 01:00:00');
+
+// Difference in hours'
+$db->datediff('hour', '2011-12-29 23:00:00', '2011-12-31 01:00:00');
+
+// Difference in minutes
+$db->datediff('minute', '2011-12-29 23:00:00', '2011-12-31 01:00:00');
+
+// Difference in seconds
+$db->datediff('second', '2011-12-29 23:00:00', '2011-12-31 01:00:00');
+```
+
+
 ### Custom select
 
 ```php
@@ -305,6 +371,15 @@ $db->table('mytable')->groupBy('columnA')->findAll();
 
 ```php
 $db->table('mytable')->count();
+```
+
+### Union
+
+```php
+
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')->columns('column2')->union($subquery)->findAll();
 ```
 
 ### Sum
@@ -367,6 +442,14 @@ $db->table('mytable')
    ->findAll();
 ```
 
+### Not Equals condition
+
+```php
+$db->table('mytable')
+   ->neq('column1', 'hey')
+   ->findAll();
+```
+
 ### IN condition
 
 ```php
@@ -375,25 +458,34 @@ $db->table('mytable')
        ->findAll();
 ```
 
-### IN condition with subquery
+or
 
 ```php
 $subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
 
 $db->table('mytable')
        ->columns('column_5')
-       ->inSubquery('column1', $subquery)
+       ->in($subquery)
        ->findAll();
 ```
 
-~~### Like condition~~ [DISABLED]
-
-~~Case-sensitive (only Mysql and Postgres):~~
+### NOT IN condition
 
 ```php
 $db->table('mytable')
-   ->like('column1', '%Foo%')
-   ->findAll();
+       ->notIn('column1', ['hey', 'bla'])
+       ->findAll();
+```
+
+or
+
+```php
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')
+       ->columns('column_5')
+       ->notIn($subquery)
+       ->findAll();
 ```
 
 ### Ilike condition
@@ -403,6 +495,16 @@ Not case-sensitive:
 ```php
 $db->table('mytable')
    ->ilike('column1', '%foo%')
+   ->findAll();
+```
+
+### Not Ilike condition
+
+Not case-sensitive:
+
+```php
+$db->table('mytable')
+   ->notIlike('column1', '%foo%')
    ->findAll();
 ```
 
