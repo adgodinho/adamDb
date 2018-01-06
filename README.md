@@ -1,7 +1,8 @@
-PicoDb
+AdamDb
 ======
 
-PicoDb is a minimalist database query builder for PHP.
+AdamDb is a minimalist database query builder for PHP.
+AdamDb is a fork from AdamDb by Frédéric Guillot
 
 Features
 --------
@@ -21,20 +22,15 @@ Requirements
 - PDO extension
 - Sqlite, Mssql, Mysql or Postgresql
 
-Author
-------
-
-Frédéric Guillot
-
 Documentation
 -------------
 
 ### Installation
 
-Add /lib/PicoDb to you project and call:
+Add /lib/AdamDb to you project and call:
 
 ```bash
-require_once dirname(__FILE__).'/lib/PicoDb/Database.php';
+require_once dirname(__FILE__).'/lib/AdamDb/Database.php';
 ```
 
 ### Database connection
@@ -42,7 +38,7 @@ require_once dirname(__FILE__).'/lib/PicoDb/Database.php';
 #### Sqlite:
 
 ```php
-use PicoDb\Database;
+require_once dirname(__FILE__).'/lib/AdamDb/Database.php';
 
 // Sqlite driver
 $db = new Database(['driver' => 'sqlite', 'filename' => ':memory:']);
@@ -118,21 +114,15 @@ Let's say you have defined an environment variable:
 export DATABASE_URL=postgres://user:pass@hostname:6212/db
 ```
 
-PicoDb can parse automatically this URL for you:
+AdamDb can parse automatically this URL for you:
 
 ```php
-use PicoDb\UrlParser;
-use PicoDb\Database;
-
 $db = new Database(UrlParser::getInstance()->getSettings());
 ```
 
 #### Connecting from a URL
 
 ```php
-use PicoDb\UrlParser;
-use PicoDb\Database;
-
 $db = new Database(UrlParser::getInstance()->getSettings('postgres://user:pass@hostname:6212/db'));
 ```
 
@@ -666,7 +656,7 @@ Example:
 ```php
 $last_schema_version = 5;
 
-$db = new PicoDb\Database(array(
+$db = new AdamDb\Database(array(
     'driver' => 'sqlite',
     'filename' => '/tmp/mydb.sqlite'
 ));
@@ -686,9 +676,9 @@ else {
 Setup a new instance:
 
 ```php
-PicoDb\Database::setInstance('myinstance', function() {
+AdamDb\Database::setInstance('myinstance', function() {
 
-    $db = new PicoDb\Database(array(
+    $db = new AdamDb\Database(array(
         'driver' => 'sqlite',
         'filename' => DB_FILENAME
     ));
@@ -705,5 +695,5 @@ PicoDb\Database::setInstance('myinstance', function() {
 Get this instance anywhere in your code:
 
 ```php
-PicoDb\Database::getInstance('myinstance')->table(...)
+AdamDb\Database::getInstance('myinstance')->table(...)
 ```
