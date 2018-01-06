@@ -2,7 +2,7 @@ AdamDb
 ======
 
 AdamDb is a minimalist database query builder for PHP.
-AdamDb is a fork from AdamDb by Frédéric Guillot
+AdamDb is a fork from PicoDb by Frédéric Guillot
 
 Features
 --------
