@@ -90,6 +90,18 @@ abstract class Base
     abstract public function date();
 
     /**
+     * Date difference
+     *
+     * @abstract
+     * @access public
+     * @param  string  $diff
+     * @param  string  $date1
+     * @param  string  $date2
+     * @return string
+     */
+    abstract public function datediff($diff, $date1, $date2);
+
+    /**
      * Current timestamp value
      *
      * @abstract

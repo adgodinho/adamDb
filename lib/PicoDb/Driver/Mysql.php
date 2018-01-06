@@ -184,6 +184,19 @@ class Mysql extends Base
     }
 
     /**
+     * Date difference
+     *
+     * @access public
+     * @param  string  $diff
+     * @param  string  $date1
+     * @param  string  $date2
+     * @return string
+     */
+    public function datediff($diff, $date1, $date2) {
+        return '';
+    }
+
+    /**
      * Get non standard operator
      *
      * @access public

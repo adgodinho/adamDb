@@ -159,6 +159,50 @@ class Postgres extends Base
     }
 
     /**
+     * Date difference
+     *
+     * @access public
+     * @param  string  $diff
+     * @param  string  $date2
+     * @param  string  $date2
+     * @return string
+     */
+    public function datediff($diff, $date1, $date2)
+    {
+        $value = strtolower($value);
+        switch ($diff) {
+        case 'year':
+            return "DATE_PART('year', '".$date2."'::date) - DATE_PART('year', '".$date1."'::date)";
+            break;
+        case 'month':
+            return "(DATE_PART('year', '".$date2."'::date) - DATE_PART('year', '".$date1."'::date)) * 12 + 
+                    (DATE_PART('month', '".$date2."'::date) - DATE_PART('month', '".$date1."'::date))";
+            break;
+        case 'day':
+            return "DATE_PART('day', '".substr_replace($date2, '00:00:00', 11, 8)."'::timestamp - '".substr_replace($date1, '00:00:00', 11, 8)."'::timestamp)";
+            break;
+        case 'week':
+            return "TRUNC(DATE_PART('day', '".$date2."'::timestamp - '".$date1."'::timestamp)/7)";
+            break;
+        case 'hour':
+            return "DATE_PART('day', '".$date2."'::timestamp - '".$date1."'::timestamp) * 24 + 
+                    DATE_PART('hour', '".$date2."'::timestamp - '".$date1."'::timestamp)";
+            break;
+        case 'minute':
+            return "(DATE_PART('day', '".$date2."'::timestamp - '".$date1."'::timestamp) * 24 + 
+                    DATE_PART('hour', '".$date2."'::timestamp - '".$date1."'::timestamp)) * 60 +
+                    DATE_PART('minute', '".$date2."'::timestamp - '".$date1."'::timestamp)";
+            break;
+        case 'second':
+            return "((DATE_PART('day', '".$date2."'::timestamp - '".$date1."'::timestamp) * 24 + 
+                    DATE_PART('hour', '".$date2."'::timestamp - '".$date1."'::timestamp)) * 60 +
+                    DATE_PART('minute', '".$date2."'::timestamp - '".$date1."'::timestamp)) * 60 +
+                    DATE_PART('second', '".$date2."'::timestamp - '".$date1."'::timestamp)";
+            break;
+        }
+    }
+
+    /**
      * Get non standard operator
      *
      * @param  string  $operator

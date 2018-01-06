@@ -301,6 +301,20 @@ class Database
     }
 
     /**
+     * Date difference
+     *
+     * @access public
+     * @param  string  $diff
+     * @param  string  $date1
+     * @param  string  $date2
+     * @return string
+     */
+    public function datediff($diff, $date1, $date2)
+    {
+        return $this->driver->datediff($diff, $date1, $date2);
+    }
+
+    /**
      * Execute a prepared statement
      *
      * Note: returns false on duplicate keys instead of SQLException

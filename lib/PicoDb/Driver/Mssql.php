@@ -144,6 +144,43 @@ class Mssql extends Base
     }
 
     /**
+     * Date difference
+     *
+     * @access public
+     * @param  string  $diff
+     * @param  string  $date1
+     * @param  string  $date2
+     * @return string
+     */
+    public function datediff($diff, $date1, $date2)
+    {
+        $value = strtolower($value);
+        switch ($diff) {
+        case 'year':
+            return "DATEDIFF(year, '".$date1."', '".$date2."')";
+            break;
+        case 'month':
+            return "DATEDIFF(month, '".$date1."', '".$date2."')";
+            break;
+        case 'day':
+            return "DATEDIFF(day, '".substr_replace($date1, '00:00:00', 11, 8)."', '".substr_replace($date2, '00:00:00', 11, 8)."')";
+            break;
+        case 'week':
+            return "DATEDIFF(week, '".$date1."', '".$date2."')";
+            break;
+        case 'hour':
+            return "DATEDIFF(hour, '".$date1."', '".$date2."')";
+            break;
+        case 'minute':
+            return "DATEDIFF(minute, '".$date1."', '".$date2."')";
+            break;
+        case 'second':
+            return "DATEDIFF(second, '".$date1."', '".$date2."')";
+            break;
+        }
+    }
+
+    /**
      * Current date value
      *
      * @access public
