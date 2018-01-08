@@ -178,6 +178,13 @@ foreach ($records as $record) {
 }
 ```
 
+### Fetch all data as an associative array,  the first column becomes the key 
+
+```php
+$records = $db->table('mytable')->columns('column1', 'column2')->findAssoc();
+
+```
+
 ### Updates
 
 ```php

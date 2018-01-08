@@ -311,6 +311,24 @@ class Table
     }
 
     /**
+     * Fetch assoc rows
+     *
+     * @access public
+     * @return array
+     */
+    public function findAssoc()
+    {
+        $rq = $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues());
+        $results = $rq->fetchAll(PDO::FETCH_GROUP|PDO::FETCH_UNIQUE|PDO::FETCH_ASSOC);
+
+        if (is_callable($this->callback) && ! empty($results)) {
+            return call_user_func($this->callback, $results);
+        }
+
+        return $results;
+    }
+
+    /**
      * Find all with a single column
      *
      * @access public
