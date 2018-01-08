@@ -424,21 +424,21 @@ $db->table('mytable')->eq('column1', 12)->exists();
 
 ```php
 // SELECT * FROM mytable INNER JOIN my_other_table AS t1 ON t1.id=mytable.foreign_key
-$db->table('mytable')->left('my_other_table as t1', 't1.id', 'mytable.foreign_key')->findAll();
+$db->table('mytable')->left('my_other_table as t1', 't1.id = mytable.foreign_key')->findAll();
 ```
 
 or 
 
 ```php
 // SELECT * FROM mytable LEFT JOIN my_other_table AS t1 ON t1.id=mytable.foreign_key
-$db->table('mytable')->left('my_other_table as t1', 't1.id', 'mytable.foreign_key', 'left')->findAll();
+$db->table('mytable')->left('my_other_table as t1', 't1.id = mytable.foreign_key', 'left')->findAll();
 ```
 
 or
 
 ```php
 // SELECT * FROM mytable LEFT JOIN my_other_table AS t1 ON t1.id=mytable.foreign_key
-$db->table('mytable')->left('my_other_table as t1', 't1.id', 'mytable.foreign_key', 'right')->findAll();
+$db->table('mytable')->left('my_other_table as t1', 't1.id = mytable.foreign_key', 'right')->findAll();
 ```
 
 ### Equals condition

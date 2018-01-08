@@ -497,19 +497,17 @@ class Table
      *
      * @access public
      * @param  string   $table              Join table
-     * @param  string   $foreign_column     Foreign key on the join table
-     * @param  string   $local_column       Local column
+     * @param  string   $condition          Foreign key on the join table
      * @param  string   $type               Join table type (LEFT, INNER, RIGHT)
      * @return $this
      */
-    public function join($table, $foreign_column, $local_column, $type = 'INNER')
+    public function join($table, $condition, $type = 'INNER')
     {
         $this->joins[] = sprintf(
-            '%s JOIN %s ON %s=%s',
+            '%s JOIN %s ON %s',
             $this->db->escapeIdentifier(strtoupper($type)),
             $this->db->escapeIdentifier($table),
-            $this->db->escapeIdentifier($foreign_column),
-            $this->db->escapeIdentifier($local_column)
+            $condition
         );
 
         return $this;
