@@ -257,28 +257,28 @@ $db->table('mytable')->findOneColumn('column1');
 
 ```php
 //Int 
-$db->->cast('column_1', 'int');
+$db->cast('column_1', 'int');
 
 //Double 
-$db->->cast('column_1', 'double');
+$db->cast('column_1', 'double');
 
 //Varchar 
-$db->->cast('column_1', 'varchar');
+$db->cast('column_1', 'varchar');
 
 //Varchar(2)
-$db->->cast('column_1', 'varchar', '2');
+$db->cast('column_1', 'varchar', '2');
 
 //Date ISO varchar('YYYYMMDD')
-$db->->cast('column_1', 'date_iso');
+$db->cast('column_1', 'date_iso');
 
 //Date BR varchar('DD/MM/YYYY')
-$db->->cast('column_1', 'date_br');
+$db->cast('column_1', 'date_br');
 
 //Date ISO date('YYYYMMDD')
-$db->->cast('column_1', 'to_date_iso');
+$db->cast('column_1', 'to_date_iso');
 
 //Date BR date('DD/MM/YYYY')
-$db->->cast('column_1', 'to_date_br');
+$db->cast('column_1', 'to_date_br');
 ```
 
 ### Current date
@@ -333,6 +333,13 @@ $subquery = $db->table('another_table')->columns('column2')->where('column3', 'v
 $db->table('mytable')
        ->columns('column_5')
        ->addSubquery($subquery)
+       ->findAll();
+
+//or with alias
+
+$db->table('mytable')
+       ->columns('column_5')
+       ->addSubquery($subquery, 'new_name')
        ->findAll();
 ```
 
