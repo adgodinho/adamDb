@@ -260,8 +260,26 @@ class ConditionBuilder
      * @param  string   $column
      * @param  mixed    $value
      */
-    public function where($column, $value, $operator = '=', $prepared = true)
+    public function where()
     {
+        $prepared = true;
+        $operator = '=';
+        $numArgs = func_num_args();
+        switch ($numArgs) {
+            case 4:
+                $prepared = func_get_arg(3);
+            case 3:
+                if(gettype(func_get_arg(2)) == 'boolean') {
+                    $prepared = func_get_arg(2);
+                } else {
+                    $operator = func_get_arg(2);
+                }
+            case 2:
+                $value = func_get_arg(1);
+            case 1:
+               $column = func_get_arg(0);
+        }
+
         if($value instanceof Table) {
             $this->addCondition($this->db->escapeIdentifier($column).' '.$operator.' ('.$value->buildSelectQuery().')');
             $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
