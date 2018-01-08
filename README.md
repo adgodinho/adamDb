@@ -420,47 +420,88 @@ Returns true if a record exists otherwise false.
 $db->table('mytable')->eq('column1', 12)->exists();
 ```
 
-### Left joins
+### JOIN
+
+```php
+// SELECT * FROM mytable INNER JOIN my_other_table AS t1 ON t1.id=mytable.foreign_key
+$db->table('mytable')->left('my_other_table as t1', 't1.id', 'mytable.foreign_key')->findAll();
+```
+
+or 
 
 ```php
 // SELECT * FROM mytable LEFT JOIN my_other_table AS t1 ON t1.id=mytable.foreign_key
-$db->table('mytable')->left('my_other_table', 't1', 'id', 'mytable', 'foreign_key')->findAll();
+$db->table('mytable')->left('my_other_table as t1', 't1.id', 'mytable.foreign_key', 'left')->findAll();
 ```
 
 or
 
 ```php
-// SELECT * FROM mytable LEFT JOIN my_other_table ON my_other_table.id=mytable.foreign_key
-$db->table('mytable')->join('my_other_table', 'id', 'foreign_key')->findAll();
+// SELECT * FROM mytable LEFT JOIN my_other_table AS t1 ON t1.id=mytable.foreign_key
+$db->table('mytable')->left('my_other_table as t1', 't1.id', 'mytable.foreign_key', 'right')->findAll();
 ```
 
 ### Equals condition
+
+Prepared statement:
 
 ```php
 $db->table('mytable')
    ->eq('column1', 'hey')
    ->findAll();
+
+// or using a subquery
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')
+   ->eq($subquery)
+   ->findAll();
+```
+
+Unprepared statement:
+
+```php
+$db->table('mytable')
+   ->eq('column1', 'column2', 'false')
+   ->findAll();
 ```
 
 ### Not Equals condition
+
+Prepared statement:
 
 ```php
 $db->table('mytable')
    ->neq('column1', 'hey')
    ->findAll();
+
+// or using a subquery
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')
+   ->neq($subquery)
+   ->findAll();
+```
+
+Unprepared statement:
+
+```php
+$db->table('mytable')
+   ->neq('column1', 'column2', false)
+   ->findAll();
 ```
 
 ### IN condition
+
+Prepared statement:
 
 ```php
 $db->table('mytable')
        ->in('column1', ['hey', 'bla'])
        ->findAll();
-```
 
-or
+//or using a subquery
 
-```php
 $subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
 
 $db->table('mytable')
@@ -469,22 +510,38 @@ $db->table('mytable')
        ->findAll();
 ```
 
+Unprepared statement:
+
+```php
+$db->table('mytable')
+       ->in('column1', ['column2', 'column2'], false)
+       ->findAll();
+```
+
 ### NOT IN condition
+
+Prepared statement:
 
 ```php
 $db->table('mytable')
        ->notIn('column1', ['hey', 'bla'])
        ->findAll();
-```
 
-or
-
-```php
+//or using a subquery
 $subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
 
 $db->table('mytable')
        ->columns('column_5')
        ->notIn($subquery)
+       ->findAll();
+
+```
+
+Unprepared statement:
+
+```php
+$db->table('mytable')
+       ->notIn('column1', ['column2', 'column2'], false)
        ->findAll();
 ```
 
@@ -492,9 +549,26 @@ $db->table('mytable')
 
 Not case-sensitive:
 
+Prepared statement:
+
 ```php
 $db->table('mytable')
    ->ilike('column1', '%foo%')
+   ->findAll();
+
+//or using a subquery
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')
+   ->ilike($subquery)
+   ->findAll();
+```
+
+Unprepared statement:
+
+```php
+$db->table('mytable')
+   ->ilike('column1', 'column2', false)
    ->findAll();
 ```
 
@@ -502,41 +576,132 @@ $db->table('mytable')
 
 Not case-sensitive:
 
+Prepared statement:
+
 ```php
 $db->table('mytable')
    ->notIlike('column1', '%foo%')
+   ->findAll();
+
+//or using a subquery
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')
+   ->notIlike($subquery)
+   ->findAll();
+```
+
+Unprepared statement:
+
+```php
+$db->table('mytable')
+   ->notIlike('column1', 'column2', false)
    ->findAll();
 ```
 
 ### Lower than condition
 
+Prepared statement:
+
 ```php
 $db->table('mytable')
    ->lt('column1', 2)
+   ->findAll();
+
+//or using a subquery
+
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')
+   ->lt($subquery)
+   ->findAll();
+```
+
+Unprepared statement:
+
+```php
+$db->table('mytable')
+   ->lt('column1', 'column2', false)
    ->findAll();
 ```
 
 ### Lower than or equal condition
 
+Prepared statement:
+
 ```php
 $db->table('mytable')
    ->lte('column1', 2)
    ->findAll();
+
+//or using a subquery
+
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')
+   ->lte($subquery)
+   ->findAll();
 ```
 
+Unprepared statement:
+
+```php
+$db->table('mytable')
+   ->lte('column1', 'column2', false)
+   ->findAll();
+```
+
+
 ### Greater than condition
+
+Prepared statement:
 
 ```php
 $db->table('mytable')
    ->gt('column1', 3)
    ->findAll();
+
+//or using a subquery
+
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')
+   ->gt($subquery)
+   ->findAll();
+```
+
+Unprepared statement:
+
+```php
+$db->table('mytable')
+   ->gt('column1', 'column2', false)
+   ->findAll();
 ```
 
 ### Greater than or equal condition
 
+Prepared statement:
+
 ```php
 $db->table('mytable')
     ->gte('column1', 3)
+    ->findAll();
+
+//or using a subquery
+
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')
+   ->gte($subquery)
+   ->findAll();
+
+```
+
+Unprepared statement:
+
+```php
+$db->table('mytable')
+    ->gte('column1', 'column2', false)
     ->findAll();
 ```
 
@@ -546,6 +711,13 @@ $db->table('mytable')
 $db->table('mytable')
    ->isNull('column1')
    ->findAll();
+
+//or using a subquery
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')
+   ->isNull($subquery)
+   ->findAll();
 ```
 
 ### IS NOT NULL condition
@@ -553,6 +725,13 @@ $db->table('mytable')
 ```php
 $db->table('mytable')
    ->notNull('column1')
+   ->findAll();
+   
+//or using a subquery
+$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+
+$db->table('mytable')
+   ->notNull($subquery)
    ->findAll();
 ```
 
