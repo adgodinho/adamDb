@@ -181,19 +181,19 @@ foreach ($records as $record) {
 ### Updates
 
 ```php
-$db->table('mytable')->eq('id', 1)->save(['column1' => 'hey']);
+$db->table('mytable')->where('id', 1)->save(['column1' => 'hey']);
 ```
 
 or
 
 ```php
-$db->table('mytable')->eq('id', 1)->update(['column1' => 'hey']);
+$db->table('mytable')->where('id', 1)->update(['column1' => 'hey']);
 ```
 
 ### Remove records
 
 ```php
-$db->table('mytable')->lt('column1', 10)->remove();
+$db->table('mytable')->where('column1', 10, '<')->remove();
 ```
 
 ### Sorting
@@ -315,13 +315,13 @@ $db->datediff('second', '2011-12-29 23:00:00', '2011-12-31 01:00:00');
 ### Custom select
 
 ```php
-$db->table('mytable')->select(1)->eq('id', 42)->findOne();
+$db->table('mytable')->select(1)->where('id', 42)->findOne();
 ```
 
 ### Select subquery
 
 ```php
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
 
 $db->table('mytable')
        ->columns('column_5')
@@ -335,7 +335,7 @@ $db->table('mytable')
 $pg->table("mytable")
    ->beginCase()
    ->caseWhen()
-   ->lt('columnA', '10')
+   ->where('columnA', '10', '<')
    ->caseThen('0')
    ->caseElse('1')
    ->closeCase('result');
@@ -347,7 +347,7 @@ or
 $pg->table("mytable")
    ->beginCase()
    ->caseWhen()
-   ->lt('columnA', '10')
+   ->where('columnA', '10', '<')
    ->caseThen()
    ->addSubquery($subquery1)
    ->caseElse()
@@ -377,7 +377,7 @@ $db->table('mytable')->count();
 
 ```php
 
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
 
 $db->table('mytable')->columns('column2')->union($subquery)->findAll();
 ```
@@ -401,7 +401,7 @@ $db->table('mytable')->sumColumn('mycolumn', 42)->update();
 Increment a column value in a single query:
 
 ```php
-$db->table('mytable')->eq('another_column', 42)->increment('my_column', 2);
+$db->table('mytable')->where('another_column', 42)->increment('my_column', 2);
 ```
 
 ### Decrement column
@@ -409,7 +409,7 @@ $db->table('mytable')->eq('another_column', 42)->increment('my_column', 2);
 Decrement a column value in a single query:
 
 ```php
-$db->table('mytable')->eq('another_column', 42)->decrement('my_column', 1);
+$db->table('mytable')->where('another_column', 42)->decrement('my_column', 1);
 ```
 
 ### Exists
@@ -417,7 +417,7 @@ $db->table('mytable')->eq('another_column', 42)->decrement('my_column', 1);
 Returns true if a record exists otherwise false.
 
 ```php
-$db->table('mytable')->eq('column1', 12)->exists();
+$db->table('mytable')->where('column1', 12)->exists();
 ```
 
 ### JOIN
@@ -441,20 +441,25 @@ or
 $db->table('mytable')->left('my_other_table as t1', 't1.id = mytable.foreign_key', 'right')->findAll();
 ```
 
-### Equals condition
+### Where condition
 
 Prepared statement:
 
 ```php
 $db->table('mytable')
-   ->eq('column1', 'hey')
+   ->where('column1', 'hey') //Defaults to = operator
+   ->where('column2', 'hey', '!=')
+   ->where('column3', '10', '>')
+   ->where('column4', '10', '>=')
+   ->where('column5', '10', '<')
+   ->where('column6', '10', '<=')
    ->findAll();
 
 // or using a subquery
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
 
 $db->table('mytable')
-   ->eq($subquery)
+   ->where($subquery)
    ->findAll();
 ```
 
@@ -462,7 +467,12 @@ Unprepared statement:
 
 ```php
 $db->table('mytable')
-   ->eq('column1', 'column2', 'false')
+   ->where('column1', 'column7') //Defaults to = operator
+   ->where('column2', 'column8', '!=', 'false')
+   ->where('column3', 'column9', '>', 'false')
+   ->where('column4', 'column10', '>=', 'false')
+   ->where('column5', 'column11', '<', 'false')
+   ->where('column6', 'column12', '<=', 'false')
    ->findAll();
 ```
 
@@ -476,7 +486,7 @@ $db->table('mytable')
    ->findAll();
 
 // or using a subquery
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
 
 $db->table('mytable')
    ->neq($subquery)
@@ -497,16 +507,16 @@ Prepared statement:
 
 ```php
 $db->table('mytable')
-       ->in('column1', ['hey', 'bla'])
+       ->whereIn('column1', ['hey', 'bla'])
        ->findAll();
 
 //or using a subquery
 
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
 
 $db->table('mytable')
        ->columns('column_5')
-       ->in($subquery)
+       ->whereIn($subquery)
        ->findAll();
 ```
 
@@ -514,7 +524,7 @@ Unprepared statement:
 
 ```php
 $db->table('mytable')
-       ->in('column1', ['column2', 'column2'], false)
+       ->whereIn('column1', ['column2', 'column2'], false)
        ->findAll();
 ```
 
@@ -524,15 +534,15 @@ Prepared statement:
 
 ```php
 $db->table('mytable')
-       ->notIn('column1', ['hey', 'bla'])
+       ->whereNotIn('column1', ['hey', 'bla'])
        ->findAll();
 
 //or using a subquery
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
 
 $db->table('mytable')
        ->columns('column_5')
-       ->notIn($subquery)
+       ->whereNotIn($subquery)
        ->findAll();
 
 ```
@@ -541,7 +551,7 @@ Unprepared statement:
 
 ```php
 $db->table('mytable')
-       ->notIn('column1', ['column2', 'column2'], false)
+       ->whereNotIn('column1', ['column2', 'column2'], false)
        ->findAll();
 ```
 
@@ -557,7 +567,7 @@ $db->table('mytable')
    ->findAll();
 
 //or using a subquery
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
 
 $db->table('mytable')
    ->ilike($subquery)
@@ -584,7 +594,7 @@ $db->table('mytable')
    ->findAll();
 
 //or using a subquery
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
 
 $db->table('mytable')
    ->notIlike($subquery)
@@ -599,112 +609,6 @@ $db->table('mytable')
    ->findAll();
 ```
 
-### Lower than condition
-
-Prepared statement:
-
-```php
-$db->table('mytable')
-   ->lt('column1', 2)
-   ->findAll();
-
-//or using a subquery
-
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
-
-$db->table('mytable')
-   ->lt($subquery)
-   ->findAll();
-```
-
-Unprepared statement:
-
-```php
-$db->table('mytable')
-   ->lt('column1', 'column2', false)
-   ->findAll();
-```
-
-### Lower than or equal condition
-
-Prepared statement:
-
-```php
-$db->table('mytable')
-   ->lte('column1', 2)
-   ->findAll();
-
-//or using a subquery
-
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
-
-$db->table('mytable')
-   ->lte($subquery)
-   ->findAll();
-```
-
-Unprepared statement:
-
-```php
-$db->table('mytable')
-   ->lte('column1', 'column2', false)
-   ->findAll();
-```
-
-
-### Greater than condition
-
-Prepared statement:
-
-```php
-$db->table('mytable')
-   ->gt('column1', 3)
-   ->findAll();
-
-//or using a subquery
-
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
-
-$db->table('mytable')
-   ->gt($subquery)
-   ->findAll();
-```
-
-Unprepared statement:
-
-```php
-$db->table('mytable')
-   ->gt('column1', 'column2', false)
-   ->findAll();
-```
-
-### Greater than or equal condition
-
-Prepared statement:
-
-```php
-$db->table('mytable')
-    ->gte('column1', 3)
-    ->findAll();
-
-//or using a subquery
-
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
-
-$db->table('mytable')
-   ->gte($subquery)
-   ->findAll();
-
-```
-
-Unprepared statement:
-
-```php
-$db->table('mytable')
-    ->gte('column1', 'column2', false)
-    ->findAll();
-```
-
 ### IS NULL condition
 
 ```php
@@ -713,7 +617,7 @@ $db->table('mytable')
    ->findAll();
 
 //or using a subquery
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
 
 $db->table('mytable')
    ->isNull($subquery)
@@ -728,7 +632,7 @@ $db->table('mytable')
    ->findAll();
    
 //or using a subquery
-$subquery = $db->table('another_table')->columns('column2')->eq('column3', 'value3');
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
 
 $db->table('mytable')
    ->notNull($subquery)
@@ -742,7 +646,7 @@ Add conditions are joined by a `AND`.
 ```php
 $db->table('mytable')
     ->like('column2', '%mytable')
-    ->gte('column1', 3)
+    ->where('column1', 3, '>=')
     ->findAll();
 ```
 
@@ -752,9 +656,9 @@ How to make a OR condition:
 $db->table('mytable')
     ->beginOr()
     ->like('column2', '%mytable')
-    ->gte('column1', 3)
+    ->where('column1', 3, '>=')
     ->closeOr()
-    ->eq('column5', 'titi')
+    ->where('column5', 'titi')
     ->findAll();
 ```
 
@@ -807,13 +711,13 @@ $db->largeObject('my_table')->insertFromStream('blobColumn', $fd, array('id' => 
 Fetch a large object as a stream (Postgres only):
 
 ```php
-$fd = $db->largeObject('my_table')->eq('id', 'something')->findOneColumnAsStream('blobColumn');
+$fd = $db->largeObject('my_table')->where('id', 'something')->findOneColumnAsStream('blobColumn');
 ```
 
 Fetch a large object as a string:
 
 ```php
-echo $db->largeObject('my_table')->eq('id', 'something')->findOneColumnAsString('blobColumn');
+echo $db->largeObject('my_table')->where('id', 'something')->findOneColumnAsString('blobColumn');
 ```
 
 Drivers:
