@@ -19,15 +19,14 @@ class Sqlite extends Base
     protected $requiredAttributes = array('filename');
 
     /**
-     * Create a new PDO connection
+     * Create a new ADOdb connection
      *
      * @access public
      * @param  array   $settings
      */
-    public function createConnection(array $settings)
+    public function createConnection($db)
     {
-        $this->pdo = new PDO('sqlite:'.$settings['filename']);
-        $this->enableForeignKeys();
+        $this->adodb = $db;
     }
 
     /**
@@ -37,7 +36,7 @@ class Sqlite extends Base
      */
     public function enableForeignKeys()
     {
-        $this->pdo->exec('PRAGMA foreign_keys = ON');
+        $this->adodb->execute('PRAGMA foreign_keys = ON');
     }
 
     /**
@@ -47,7 +46,7 @@ class Sqlite extends Base
      */
     public function disableForeignKeys()
     {
-        $this->pdo->exec('PRAGMA foreign_keys = OFF');
+        $this->adodb->execute('PRAGMA foreign_keys = OFF');
     }
 
     /**
@@ -97,7 +96,8 @@ class Sqlite extends Base
      * @access public
      * @return string
      */
-    public function date() {
+    public function date()
+    {
         return "date('now')";
     }
     
@@ -107,7 +107,8 @@ class Sqlite extends Base
      * @access public
      * @return string
      */
-    public function timestamp() {
+    public function timestamp()
+    {
         return "datetime(CURRENT_TIMESTAMP, 'localtime')";
     }
 
@@ -120,7 +121,8 @@ class Sqlite extends Base
      * @param  string  $date2
      * @return string
      */
-    public function datediff($diff, $date1, $date2) {
+    public function datediff($diff, $date1, $date2)
+    {
         return '';
     }
 
@@ -148,7 +150,7 @@ class Sqlite extends Base
      */
     public function getLastId()
     {
-        return $this->pdo->lastInsertId();
+        return $this->adodb->lastInsertId();
     }
 
     /**
@@ -159,7 +161,7 @@ class Sqlite extends Base
      */
     public function getSchemaVersion()
     {
-        $rq = $this->pdo->prepare('PRAGMA user_version');
+        $rq = $this->adodb->prepare('PRAGMA user_version');
         $rq->execute();
 
         return (int) $rq->fetchColumn();
@@ -173,7 +175,7 @@ class Sqlite extends Base
      */
     public function setSchemaVersion($version)
     {
-        $this->pdo->exec('PRAGMA user_version='.$version);
+        $this->adodb->execute('PRAGMA user_version='.$version);
     }
 
     /**
@@ -189,7 +191,7 @@ class Sqlite extends Base
     public function upsert($table, $keyColumn, $valueColumn, array $dictionary)
     {
         try {
-            $this->pdo->beginTransaction();
+            $this->adodb->beginTransaction();
 
             foreach ($dictionary as $key => $value) {
 
@@ -200,16 +202,16 @@ class Sqlite extends Base
                     $this->escape($valueColumn)
                 );
 
-                $rq = $this->pdo->prepare($sql);
+                $rq = $this->adodb->prepare($sql);
                 $rq->execute(array($key, $value));
             }
 
-            $this->pdo->commit();
+            $this->adodb->commit();
 
             return true;
         }
-        catch (PDOException $e) {
-            $this->pdo->rollBack();
+        catch (ADODB_Exception $e) {
+            $this->adodb->rollBack();
             return false;
         }
     }
@@ -224,7 +226,7 @@ class Sqlite extends Base
      */
     public function explain($sql, array $values)
     {
-        return $this->getConnection()->query('EXPLAIN QUERY PLAN '.$this->getSqlFromPreparedStatement($sql, $values))->fetchAll(PDO::FETCH_ASSOC);
+        return $this->getConnection()->query('EXPLAIN QUERY PLAN '.$this->getSqlFromPreparedStatement($sql, $values))->fetchAll(ADOdb::FETCH_ASSOC);
     }
 
     /**

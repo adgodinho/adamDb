@@ -17,21 +17,21 @@ abstract class Base
     protected $requiredAttributes = array();
 
     /**
-     * PDO connection
+     * ADOdb connection
      *
      * @access protected
-     * @var PDO
+     * @var ADOdb
      */
-    protected $pdo = null;
+    protected $adodb = null;
 
     /**
-     * Create a new PDO connection
+     * Create a new ADOdb connection
      *
      * @abstract
      * @access public
      * @param  array   $settings
      */
-    abstract public function createConnection(array $settings);
+    abstract public function createConnection($db);
 
     /**
      * Enable foreign keys
@@ -153,37 +153,31 @@ abstract class Base
      * @access public
      * @param  array   $settings
      */
-    public function __construct(array $settings)
+    public function __construct($db)
     {
-        foreach ($this->requiredAttributes as $attribute) {
-            if (! isset($settings[$attribute])) {
-                throw new LogicException('This configuration parameter is missing: "'.$attribute.'"');
-            }
-        }
-
-        $this->createConnection($settings);
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->createConnection($db);
+        // $this->adodb->setAttribute(ADOdb::ATTR_ERRMODE, ADOdb::ERRMODE_EXCEPTION);
     }
 
     /**
-     * Get the PDO connection
+     * Get the ADOdb connection
      *
      * @access public
-     * @return PDO
+     * @return ADOdb
      */
     public function getConnection()
     {
-        return $this->pdo;
+        return $this->adodb;
     }
 
     /**
-     * Release the PDO connection
+     * Release the ADOdb connection
      *
      * @access public
      */
     public function closeConnection()
     {
-        $this->pdo = null;
+        $this->adodb = null;
     }
 
     /**
@@ -199,29 +193,29 @@ abstract class Base
     public function upsert($table, $keyColumn, $valueColumn, array $dictionary)
     {
         try {
-            $this->pdo->beginTransaction();
+            $this->adodb->beginTransaction();
 
             foreach ($dictionary as $key => $value) {
 
-                $rq = $this->pdo->prepare('SELECT 1 FROM '.$this->escape($table).' WHERE '.$this->escape($keyColumn).'=?');
+                $rq = $this->adodb->prepare('SELECT 1 FROM '.$this->escape($table).' WHERE '.$this->escape($keyColumn).'=?');
                 $rq->execute(array($key));
 
                 if ($rq->fetchColumn()) {
-                    $rq = $this->pdo->prepare('UPDATE '.$this->escape($table).' SET '.$this->escape($valueColumn).'=? WHERE '.$this->escape($keyColumn).'=?');
+                    $rq = $this->adodb->prepare('UPDATE '.$this->escape($table).' SET '.$this->escape($valueColumn).'=? WHERE '.$this->escape($keyColumn).'=?');
                     $rq->execute(array($value, $key));
                 }
                 else {
-                    $rq = $this->pdo->prepare('INSERT INTO '.$this->escape($table).' ('.$this->escape($keyColumn).', '.$this->escape($valueColumn).') VALUES (?, ?)');
+                    $rq = $this->adodb->prepare('INSERT INTO '.$this->escape($table).' ('.$this->escape($keyColumn).', '.$this->escape($valueColumn).') VALUES (?, ?)');
                     $rq->execute(array($key, $value));
                 }
             }
 
-            $this->pdo->commit();
+            $this->adodb->commit();
 
             return true;
         }
-        catch (PDOException $e) {
-            $this->pdo->rollBack();
+        catch (ADODB_Exception $e) {
+            $this->adodb->rollBack();
             return false;
         }
     }
@@ -236,7 +230,7 @@ abstract class Base
      */
     public function explain($sql, array $values)
     {
-        return $this->getConnection()->query('EXPLAIN '.$this->getSqlFromPreparedStatement($sql, $values))->fetchAll(PDO::FETCH_ASSOC);
+        return $this->getConnection()->query('EXPLAIN '.$this->getSqlFromPreparedStatement($sql, $values))->fetchAll(ADOdb::FETCH_ASSOC);
     }
 
     /**

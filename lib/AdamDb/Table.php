@@ -300,14 +300,14 @@ class Table
      */
     public function findAll()
     {
-        $rq = $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues());
-        $results = $rq->fetchAll(PDO::FETCH_ASSOC);
+        $results = $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues());
+        //$results = $rq->fetchAll(PDO::FETCH_ASSOC);
 
         if (is_callable($this->callback) && ! empty($results)) {
             return call_user_func($this->callback, $results);
         }
 
-        return $results;
+        return $results->getRows();
     }
 
     /**
@@ -318,21 +318,21 @@ class Table
      */
     public function findAssoc()
     {
-        (sizeof($this->columns) == 2) ? $directMap = true : $directMap = false;
-        $rq = $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues());
-        $results = $rq->fetchAll(PDO::FETCH_GROUP|PDO::FETCH_UNIQUE|PDO::FETCH_ASSOC);
+        // (sizeof($this->columns) == 2) ? $directMap = true : $directMap = false;
+        $results = $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues())->getAssoc();
+        //$results = $rq->fetchAll(PDO::FETCH_GROUP|PDO::FETCH_UNIQUE|PDO::FETCH_ASSOC);
 
         if (is_callable($this->callback) && ! empty($results)) {
             return call_user_func($this->callback, $results);
         }
 
-        if($directMap) {
-            $map = array();
-            foreach ($results as $key => $value) {
-                $map[$key] = array_pop($value);
-            }
-            return $map;
-        }
+        // if($directMap) {
+        //     $map = array();
+        //     foreach ($results as $key => $value) {
+        //         $map[$key] = array_pop($value);
+        //     }
+        //     return $map;
+        // }
 
         return $results;
     }
@@ -349,7 +349,7 @@ class Table
         $this->columns = array($column);
         $rq = $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues());
 
-        return $rq->fetchAll(PDO::FETCH_COLUMN, 0);
+        return $rq->getRows();
     }
 
     /**
@@ -363,7 +363,7 @@ class Table
         $this->limit(1);
         $result = $this->findAll();
 
-        return isset($result[0]) ? $result[0] : null;
+        return $result;
     }
 
     /**
@@ -378,7 +378,7 @@ class Table
         $this->limit(1);
         $this->columns = array($column);
 
-        return $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues())->fetchColumn();
+        return $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues())->fetchColumn()->getRows();
     }
 
     /**
@@ -756,6 +756,7 @@ class Table
      */
     public function buildSelectQuery()
     {
+        $this->columns = array_map('strtolower', $this->columns);
         if (empty($this->sqlSelect)) {
             $this->columns = $this->db->escapeIdentifierList($this->columns);
             $this->sqlSelect = ($this->distinct ? 'DISTINCT ' : '').(empty($this->columns) ? '*' : implode(', ', $this->columns));

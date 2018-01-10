@@ -11,19 +11,6 @@ require_once dirname(__FILE__).'/Base.php';
 class Mysql extends Base
 {
     /**
-     * List of required settings options
-     *
-     * @access protected
-     * @var array
-     */
-    protected $requiredAttributes = array(
-        'hostname',
-        'username',
-        'password',
-        'database',
-    );
-
-    /**
      * Table to store the schema version
      *
      * @access private
@@ -32,23 +19,14 @@ class Mysql extends Base
     private $schemaTable = 'schema_version';
 
     /**
-     * Create a new PDO connection
+     * Create a new ADOdb connection
      *
      * @access public
      * @param  array   $settings
      */
-    public function createConnection(array $settings)
+    public function createConnection($db)
     {
-        $this->pdo = new PDO(
-            $this->buildDsn($settings),
-            $settings['username'],
-            $settings['password'],
-            $this->buildOptions($settings)
-        );
-
-        if (isset($settings['schema_table'])) {
-            $this->schemaTable = $settings['schema_table'];
-        }
+        $this->adodb = $db;
     }
 
     /**
@@ -80,23 +58,23 @@ class Mysql extends Base
     protected function buildOptions(array $settings)
     {
         $options = array(
-            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET sql_mode = STRICT_ALL_TABLES',
+            ADOdb::MYSQL_ATTR_INIT_COMMAND => 'SET sql_mode = STRICT_ALL_TABLES',
         );
 
         if (! empty($settings['ssl_key'])) {
-            $options[PDO::MYSQL_ATTR_SSL_KEY] = $settings['ssl_key'];
+            $options[ADOdb::MYSQL_ATTR_SSL_KEY] = $settings['ssl_key'];
         }
 
         if (! empty($settings['ssl_cert'])) {
-            $options[PDO::MYSQL_ATTR_SSL_CERT] = $settings['ssl_cert'];
+            $options[ADOdb::MYSQL_ATTR_SSL_CERT] = $settings['ssl_cert'];
         }
 
         if (! empty($settings['ssl_ca'])) {
-            $options[PDO::MYSQL_ATTR_SSL_CA] = $settings['ssl_ca'];
+            $options[ADOdb::MYSQL_ATTR_SSL_CA] = $settings['ssl_ca'];
         }
 
         if (! empty($settings['persistent'])) {
-            $options[PDO::ATTR_PERSISTENT] = $settings['persistent'];
+            $options[ADOdb::ATTR_PERSISTENT] = $settings['persistent'];
         }
 
         return $options;
@@ -109,7 +87,7 @@ class Mysql extends Base
      */
     public function enableForeignKeys()
     {
-        $this->pdo->exec('SET FOREIGN_KEY_CHECKS=1');
+        $this->adodb->execute('SET FOREIGN_KEY_CHECKS=1');
     }
 
     /**
@@ -119,7 +97,7 @@ class Mysql extends Base
      */
     public function disableForeignKeys()
     {
-        $this->pdo->exec('SET FOREIGN_KEY_CHECKS=0');
+        $this->adodb->execute('SET FOREIGN_KEY_CHECKS=0');
     }
 
     /**
@@ -169,7 +147,8 @@ class Mysql extends Base
      * @access public
      * @return string
      */
-    public function date() {
+    public function date()
+    {
         return 'CURDATE()';
     }
     
@@ -179,7 +158,8 @@ class Mysql extends Base
      * @access public
      * @return string
      */
-    public function timestamp() {
+    public function timestamp()
+    {
         return 'CURRENT_TIMESTAMP()';
     }
 
@@ -192,7 +172,8 @@ class Mysql extends Base
      * @param  string  $date2
      * @return string
      */
-    public function datediff($diff, $date1, $date2) {
+    public function datediff($diff, $date1, $date2)
+    {
         return '';
     }
 
@@ -223,7 +204,7 @@ class Mysql extends Base
      */
     public function getLastId()
     {
-        return $this->pdo->lastInsertId();
+        return $this->adodb->lastInsertId();
     }
 
     /**
@@ -234,9 +215,9 @@ class Mysql extends Base
      */
     public function getSchemaVersion()
     {
-        $this->pdo->exec("CREATE TABLE IF NOT EXISTS `".$this->schemaTable."` (`version` INT DEFAULT '0') ENGINE=InnoDB CHARSET=utf8");
+        $this->adodb->execute("CREATE TABLE IF NOT EXISTS `".$this->schemaTable."` (`version` INT DEFAULT '0') ENGINE=InnoDB CHARSET=utf8");
 
-        $rq = $this->pdo->prepare('SELECT `version` FROM `'.$this->schemaTable.'`');
+        $rq = $this->adodb->prepare('SELECT `version` FROM `'.$this->schemaTable.'`');
         $rq->execute();
         $result = $rq->fetchColumn();
 
@@ -244,7 +225,7 @@ class Mysql extends Base
             return (int) $result;
         }
         else {
-            $this->pdo->exec('INSERT INTO `'.$this->schemaTable.'` VALUES(0)');
+            $this->adodb->execute('INSERT INTO `'.$this->schemaTable.'` VALUES(0)');
         }
 
         return 0;
@@ -258,7 +239,7 @@ class Mysql extends Base
      */
     public function setSchemaVersion($version)
     {
-        $rq = $this->pdo->prepare('UPDATE `'.$this->schemaTable.'` SET `version`=?');
+        $rq = $this->adodb->prepare('UPDATE `'.$this->schemaTable.'` SET `version`=?');
         $rq->execute(array($version));
     }
 
@@ -291,12 +272,12 @@ class Mysql extends Base
                 $values[] = $value;
             }
 
-            $rq = $this->pdo->prepare($sql);
+            $rq = $this->adodb->prepare($sql);
             $rq->execute($values);
 
             return true;
         }
-        catch (PDOException $e) {
+        catch (ADODB_Exception $e) {
             return false;
         }
     }

@@ -242,20 +242,22 @@ class StatementHandler
      * Note: returns false on duplicate keys instead of SQLException
      *
      * @access public
-     * @return PDOStatement|false
+     * @return ADODB_Exception|false
      */
     public function execute()
     {
         try {
             $this->beforeExecute();
 
-            $pdoStatement = $this->db->getConnection()->prepare($this->sql);
-            $this->bindParams($pdoStatement);
-            $pdoStatement->execute();
+            
+            $adodb = $this->db->getConnection();
+            $handle = $adodb->prepare($this->sql);
+            //$this->bindParams($pdoStatement);
+            $result = $adodb->execute($handle, $this->positionalParams);
 
             $this->afterExecute();
-            return $pdoStatement;
-        } catch (PDOException $e) {
+            return $result;
+        } catch (ADODB_Exception $e) {
             return $this->handleSqlError($e);
         }
     }
@@ -353,14 +355,14 @@ class StatementHandler
     }
 
     /**
-     * Handle PDOException
+     * Handle ADODB_Exception
      *
      * @access public
-     * @param  PDOException $e
+     * @param  ADODB_Exception $e
      * @return bool
      * @throws SQLException
      */
-    public function handleSqlError(PDOException $e)
+    public function handleSqlError(ADODB_Exception $e)
     {
         $this->cleanup();
         $this->db->cancelTransaction();

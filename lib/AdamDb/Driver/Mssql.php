@@ -11,19 +11,6 @@ require_once dirname(__FILE__).'/Base.php';
 class Mssql extends Base
 {
     /**
-     * List of required settings options
-     *
-     * @access protected
-     * @var array
-     */
-    protected $requiredAttributes = array(
-        'hostname',
-        'username',
-        'password',
-        'database',
-    );
-
-    /**
      * Table to store the schema version
      *
      * @access private
@@ -32,25 +19,14 @@ class Mssql extends Base
     private $schemaTable = 'schema_version';
 
     /**
-     * Create a new PDO connection
+     * Create a new ADOdb connection
      *
      * @access public
      * @param  array   $settings
      */
-    public function createConnection(array $settings)
+    public function createConnection($db)
     {
-        if (! empty($settings['port'])) {
-            $dsn = 'dblib:host=' . $settings['hostname'] . ':' . $settings['port'] . ';dbname=' . $settings['database'];
-        } {
-            $dsn = 'dblib:host=' . $settings['hostname'] . ';dbname=' . $settings['database'];
-        }
-
-        $this->pdo = new PDO($dsn, $settings['username'], $settings['password']);
-        $this->pdo->setAttribute( PDO::ATTR_CASE, PDO::CASE_LOWER );
-
-        if (isset($settings['schema_table'])) {
-            $this->schemaTable = $settings['schema_table'];
-        }
+        $this->adodb = $db;
     }
 
     /**
@@ -60,7 +36,7 @@ class Mssql extends Base
      */
     public function enableForeignKeys()
     {
-        $this->pdo->exec('EXEC sp_MSforeachtable @command1="ALTER TABLE ? CHECK CONSTRAINT ALL"; GO;');
+        $this->adodb->execute('EXEC sp_MSforeachtable @command1="ALTER TABLE ? CHECK CONSTRAINT ALL"; GO;');
     }
 
     /**
@@ -70,7 +46,7 @@ class Mssql extends Base
      */
     public function disableForeignKeys()
     {
-        $this->pdo->exec('EXEC sp_MSforeachtable @command1="ALTER TABLE ? NOCHECK CONSTRAINT ALL"; GO;');
+        $this->adodb->execute('EXEC sp_MSforeachtable @command1="ALTER TABLE ? NOCHECK CONSTRAINT ALL"; GO;');
     }
 
     /**
@@ -186,7 +162,8 @@ class Mssql extends Base
      * @access public
      * @return string
      */
-    public function date() {
+    public function date()
+    {
     	return 'CONVERT (date, GETDATE())';
     }
 	
@@ -196,7 +173,8 @@ class Mssql extends Base
      * @access public
      * @return string
      */
-    public function timestamp() {
+    public function timestamp()
+    {
     	return 'GETDATE()';
     }
 
@@ -224,7 +202,7 @@ class Mssql extends Base
      */
     public function getLastId()
     {
-        return $this->pdo->lastInsertId();
+        return $this->adodb->lastInsertId();
     }
 
     /**
@@ -235,9 +213,9 @@ class Mssql extends Base
      */
     public function getSchemaVersion()
     {
-        $this->pdo->exec("CREATE TABLE IF NOT EXISTS [".$this->schemaTable."] ([version] INT DEFAULT '0')");
+        $this->adodb->execute("CREATE TABLE IF NOT EXISTS [".$this->schemaTable."] ([version] INT DEFAULT '0')");
 
-        $rq = $this->pdo->prepare('SELECT [version] FROM ['.$this->schemaTable.']');
+        $rq = $this->adodb->prepare('SELECT [version] FROM ['.$this->schemaTable.']');
         $rq->execute();
         $result = $rq->fetchColumn();
 
@@ -245,7 +223,7 @@ class Mssql extends Base
             return (int) $result;
         }
         else {
-            $this->pdo->exec('INSERT INTO ['.$this->schemaTable.'] VALUES(0)');
+            $this->adodb->execute('INSERT INTO ['.$this->schemaTable.'] VALUES(0)');
         }
 
         return 0;
@@ -259,7 +237,7 @@ class Mssql extends Base
      */
     public function setSchemaVersion($version)
     {
-        $rq = $this->pdo->prepare('UPDATE ['.$this->schemaTable.'] SET [version]=?');
+        $rq = $this->adodb->prepare('UPDATE ['.$this->schemaTable.'] SET [version]=?');
         $rq->execute(array($version));
     }
 
@@ -272,7 +250,7 @@ class Mssql extends Base
      */
     public function explain($sql, array $values)
     {
-        $this->getConnection()->exec('SET SHOWPLAN_ALL ON');
-        return $this->getConnection()->query($this->getSqlFromPreparedStatement($sql, $values))->fetchAll(PDO::FETCH_ASSOC);
+        $this->getConnection()->execute('SET SHOWPLAN_ALL ON');
+        return $this->getConnection()->query($this->getSqlFromPreparedStatement($sql, $values))->fetchAll(ADOdb::FETCH_ASSOC);
     }
 }

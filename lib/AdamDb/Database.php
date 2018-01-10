@@ -68,9 +68,9 @@ class Database
      * @access public
      * @param  array   $settings
      */
-    public function __construct(array $settings = array())
+    public function __construct($db)
     {
-        $this->driver = DriverFactory::getDriver($settings);
+        $this->driver = DriverFactory::getDriver($db);
         $this->statementHandler = new StatementHandler($this);
         $this->inTransaction = false;
     }
@@ -348,7 +348,7 @@ class Database
             $this->closeTransaction();
 
             return $result === null ? true : $result;
-        } catch (PDOException $e) {
+        } catch (ADODB_Exception $e) {
             return $this->statementHandler->handleSqlError($e);
         }
     }
@@ -362,7 +362,7 @@ class Database
     {
         if (!$this->inTransaction) {
             $this->inTransaction = true;
-            $this->getConnection()->beginTransaction();
+            $this->getConnection()->beginTrans();
         }
     }
 
@@ -374,7 +374,7 @@ class Database
     public function closeTransaction()
     {
         if ($this->inTransaction) {
-            $this->getConnection()->commit();
+            $this->getConnection()->commitTrans();
             $this->inTransaction = false;
         }
     }
@@ -387,7 +387,7 @@ class Database
     public function cancelTransaction()
     {
         if ($this->inTransaction) {
-            $this->getConnection()->rollBack();
+            $this->getConnection()->rollbackTrans();
             $this->inTransaction = false;
         }
     }

@@ -42,5 +42,6 @@ Thumbs.db
 ################
 index.php
 example.php
+lib/adodb5
 vendorindex.php
 sftp-config.json
