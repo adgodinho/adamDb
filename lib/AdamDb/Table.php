@@ -229,14 +229,13 @@ class Table
      */
     public function update(array $data = array())
     {
-        $values = array_merge(array_values($data), array_values($this->sumColumns), $this->conditionBuilder->getValues());
         $sql = UpdateBuilder::getInstance($this->db, $this->conditionBuilder)
             ->withTable($this->name)
-            ->withColumns(array_keys($data))
-            ->withSumColumns(array_keys($this->sumColumns))
+            ->withColumns($data)
+            ->withSumColumns($this->sumColumns)
             ->build();
 
-        return $this->db->execute($sql, $values) !== false;
+        return $this->db->execute($sql, $this->conditionBuilder->getValues()) !== false;
     }
 
     /**
@@ -248,14 +247,12 @@ class Table
      */
     public function insert(array $data)
     {
-        return $this->db->getStatementHandler()
-            ->withSql(InsertBuilder::getInstance($this->db, $this->conditionBuilder)
+        $sql = InsertBuilder::getInstance($this->db, $this->conditionBuilder)
                 ->withTable($this->name)
-                ->withColumns(array_keys($data))
-                ->build()
-            )
-            ->withNamedParams($data)
-            ->execute() !== false;
+                ->withColumns($data)
+                ->build();
+
+        return $this->db->execute($sql, $this->conditionBuilder->getValues()) !== false;
     }
 
     /**
@@ -301,7 +298,6 @@ class Table
     public function findAll()
     {
         $results = $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues());
-        //$results = $rq->fetchAll(PDO::FETCH_ASSOC);
 
         if (is_callable($this->callback) && ! empty($results)) {
             return call_user_func($this->callback, $results);
@@ -318,21 +314,11 @@ class Table
      */
     public function findAssoc()
     {
-        // (sizeof($this->columns) == 2) ? $directMap = true : $directMap = false;
         $results = $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues())->getAssoc();
-        //$results = $rq->fetchAll(PDO::FETCH_GROUP|PDO::FETCH_UNIQUE|PDO::FETCH_ASSOC);
 
         if (is_callable($this->callback) && ! empty($results)) {
             return call_user_func($this->callback, $results);
         }
-
-        // if($directMap) {
-        //     $map = array();
-        //     foreach ($results as $key => $value) {
-        //         $map[$key] = array_pop($value);
-        //     }
-        //     return $map;
-        // }
 
         return $results;
     }

@@ -202,7 +202,7 @@ class Mssql extends Base
      */
     public function getLastId()
     {
-        return $this->adodb->lastInsertId();
+        return $this->adodb->insert_Id();
     }
 
     /**

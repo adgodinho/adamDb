@@ -150,7 +150,7 @@ class Sqlite extends Base
      */
     public function getLastId()
     {
-        return $this->adodb->lastInsertId();
+        return $this->adodb->insert_Id();
     }
 
     /**

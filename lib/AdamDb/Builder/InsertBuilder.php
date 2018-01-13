@@ -33,19 +33,11 @@ class InsertBuilder extends BaseBuilder
      */
     public function build()
     {
-        $columns = array();
-        $placeholders = array();
-
-        foreach ($this->columns as $column) {
-            $columns[] = $this->db->escapeIdentifier($column);
-            $placeholders[] = ':'.$column;
-        }
-
         return sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
             $this->db->escapeIdentifier($this->table),
-            implode(', ', $columns),
-            implode(', ', $placeholders)
+            implode(', ', array_keys($this->columns)),
+            implode(', ', array_values($this->columns))
         );
     }
 }

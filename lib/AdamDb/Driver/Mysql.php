@@ -28,58 +28,6 @@ class Mysql extends Base
     {
         $this->adodb = $db;
     }
-
-    /**
-     * Build connection DSN
-     *
-     * @access protected
-     * @param  array $settings
-     * @return string
-     */
-    protected function buildDsn(array $settings)
-    {
-        $charset = empty($settings['charset']) ? 'utf8' : $settings['charset'];
-        $dsn = 'mysql:host='.$settings['hostname'].';dbname='.$settings['database'].';charset='.$charset;
-
-        if (! empty($settings['port'])) {
-            $dsn .= ';port='.$settings['port'];
-        }
-
-        return $dsn;
-    }
-
-    /**
-     * Build connection options
-     *
-     * @access protected
-     * @param  array $settings
-     * @return array
-     */
-    protected function buildOptions(array $settings)
-    {
-        $options = array(
-            ADOdb::MYSQL_ATTR_INIT_COMMAND => 'SET sql_mode = STRICT_ALL_TABLES',
-        );
-
-        if (! empty($settings['ssl_key'])) {
-            $options[ADOdb::MYSQL_ATTR_SSL_KEY] = $settings['ssl_key'];
-        }
-
-        if (! empty($settings['ssl_cert'])) {
-            $options[ADOdb::MYSQL_ATTR_SSL_CERT] = $settings['ssl_cert'];
-        }
-
-        if (! empty($settings['ssl_ca'])) {
-            $options[ADOdb::MYSQL_ATTR_SSL_CA] = $settings['ssl_ca'];
-        }
-
-        if (! empty($settings['persistent'])) {
-            $options[ADOdb::ATTR_PERSISTENT] = $settings['persistent'];
-        }
-
-        return $options;
-    }
-
     /**
      * Enable foreign keys
      *
@@ -204,7 +152,7 @@ class Mysql extends Base
      */
     public function getLastId()
     {
-        return $this->adodb->lastInsertId();
+        return $this->adodb->insert_Id();
     }
 
     /**

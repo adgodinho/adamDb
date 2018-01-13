@@ -53,12 +53,12 @@ class UpdateBuilder extends BaseBuilder
     {
         $columns = array();
 
-        foreach ($this->columns as $column) {
-            $columns[] = $this->db->escapeIdentifier($column).'=?';
+        foreach ($this->columns as $column => $value) {
+            $columns[] = $this->db->escapeIdentifier($column).'='.$value;
         }
 
-        foreach ($this->sumColumns as $column) {
-            $columns[] = $this->db->escapeIdentifier($column).'='.$this->db->escapeIdentifier($column).' + ?';
+        foreach ($this->sumColumns as $column => $value) {
+            $columns[] = $this->db->escapeIdentifier($column).'='.$this->db->escapeIdentifier($column).' + '.$value;
         }
 
         return sprintf(
