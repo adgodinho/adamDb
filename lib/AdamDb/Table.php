@@ -742,10 +742,21 @@ class Table
      */
     public function buildSelectQuery()
     {
-        $this->columns = array_map('strtolower', $this->columns);
+        
         if (empty($this->sqlSelect)) {
+            if(empty($this->columns)) {
+                $columnsName = $this->db->execute("select column_name from information_schema.columns where table_name = ? order by ordinal_position", array($this->name));
+                if(!empty($columnsName)) {
+                    $columnsName = $columnsName->getRows();
+                    foreach ($columnsName as $key => $value) {
+                        $this->columns[] = $value['column_name'];
+                    }
+                }
+            }
+
+            $this->columns = array_map('strtolower', $this->columns);
             $this->columns = $this->db->escapeIdentifierList($this->columns);
-            $this->sqlSelect = ($this->distinct ? 'DISTINCT ' : '').(empty($this->columns) ? '*' : implode(', ', $this->columns));
+            $this->sqlSelect = ($this->distinct ? 'DISTINCT ' : '').implode(', ', $this->columns);
         }
 
         $this->groupBy = $this->db->escapeIdentifierList($this->groupBy);

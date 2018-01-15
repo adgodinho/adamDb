@@ -201,7 +201,7 @@ class ConditionBuilder
         if(is_null($alias)) {
             $this->addCondition('END )');
         } else {
-            $this->addCondition('END ) AS '.$this->db->escapeIdentifier($alias));
+            $this->addCondition('END ) AS '.$this->db->escapeIdentifier(strtolower(strtolower($alias))));
         }
 
         $condition = $this->caseConditions[$this->caseConditionOffset]->build();
@@ -354,7 +354,7 @@ class ConditionBuilder
         if(is_null($alias)) {
             $this->addCondition('('.$subquery->buildSelectQuery().')');
         } else {
-            $this->addCondition('('.$subquery->buildSelectQuery().') AS '.$this->db->escapeIdentifier($alias));
+            $this->addCondition('('.$subquery->buildSelectQuery().') AS '.$this->db->escapeIdentifier(strtolower($alias)));
         }
 
         $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
