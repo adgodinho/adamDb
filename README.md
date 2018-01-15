@@ -1,7 +1,7 @@
 AdamDb
 ======
 
-AdamDb is a minimalist database query builder for PHP.
+AdamDb is a minimalist database query builder for PHP/ADOdb.
 AdamDb is a fork from PicoDb by Frédéric Guillot
 
 Features
@@ -9,17 +9,15 @@ Features
 
 - Easy to use, easy to hack, fast and very lightweight
 - Supported drivers: Sqlite, Mssql, Mysql, Postgresql
-- Requires only PDO
+- Requires only ADOdb
 - Use prepared statements
-- Handle schema migrations
-- Fully unit tested on PHP 5.2 (Testing), 5.3, 5.4, 5.5, 5.6 and 7.0
 - License: MIT
 
 Requirements
 ------------
 
 - PHP >= 5.2
-- PDO extension
+- ADOdb extension
 - Sqlite, Mssql, Mysql or Postgresql
 
 Documentation
@@ -35,127 +33,38 @@ require_once dirname(__FILE__).'/lib/AdamDb/Database.php';
 
 ### Database connection
 
-#### Sqlite:
-
 ```php
 require_once dirname(__FILE__).'/lib/AdamDb/Database.php';
 
-// Sqlite driver
-$db = new Database(['driver' => 'sqlite', 'filename' => ':memory:']);
+$db = new Database($ADODB);
 ```
 
-The Sqlite driver enable foreign keys by default.
-
-#### Microsoft SQL server:
+### INSERTION
 
 ```php
-// Optional attributes:
-// "schema_table" (the default table name is "schema_version")
-
-$db = new Database([
-    'driver' => 'mssql',
-    'hostname' => 'localhost',
-    'username' => 'root',
-    'password' => '',
-    'database' => 'my_db_name',
-]);
-```
-
-Optional attributes:
-
-- schema_table
-
-#### Mysql:
-
-```php
-$db = new Database([
-    'driver' => 'mysql',
-    'hostname' => 'localhost',
-    'username' => 'root',
-    'password' => '',
-    'database' => 'my_db_name',
-    'ssl_key' => '/path/to/client-key.pem',
-    'ssl_cert' => '/path/to/client-cert.pem',
-    'ssl_ca' => '/path/to/ca-cert.pem',
-]);
-```
-
-Optional attributes:
-
-- charset
-- schema_table
-- port
-- ssl_key
-- ssl_cert
-- ssl_key
-
-#### Postgres:
-
-```php
-$db = new Database([
-    'driver' => 'postgres',
-    'hostname' => 'localhost',
-    'username' => 'root',
-    'password' => '',
-    'database' => 'my_db_name',
-]);
-```
-
-Optional attributes:
-
-- port
-- schema_table
-
-#### Connecting from an environment variable:
-
-Let's say you have defined an environment variable:
-
-```bash
-export DATABASE_URL=postgres://user:pass@hostname:6212/db
-```
-
-AdamDb can parse automatically this URL for you:
-
-```php
-$db = new Database(UrlParser::getInstance()->getSettings());
-```
-
-#### Connecting from a URL
-
-```php
-$db = new Database(UrlParser::getInstance()->getSettings('postgres://user:pass@hostname:6212/db'));
-```
-
-### Insertion
-
-```php
-$db->table('mytable')->save(['column1' => 'test']);
+$db->table('mytable')->save(array('column1' => 'test'));
 ```
 
 or
 
 ```php
-$db->table('mytable')->insert(['column1' => 'test']);
+$db->table('mytable')->insert(array('column1' => 'test'));
 ```
 
-### Fetch last inserted id
+### Fetch LAST INSERTED ID
 
 ```php
 $db->getLastId();
 ```
 
-### Transactions
+### TRANSACTIONS
 
 ```php
 $db->transaction(function ($db) {
-    $db->table('mytable')->save(['column1' => 'foo']);
-    $db->table('mytable')->save(['column1' => 'bar']);
+    $db->table('mytable')->save(array('column1' => 'foo'));
+    $db->table('mytable')->save(array('column1' => 'bar'));
 });
 ```
-
-- Returns `true` if the callback returns null
-- Returns the callback return value otherwise
-- Throws an SQLException if something is wrong
 
 or
 
@@ -168,7 +77,7 @@ $db->closeTransaction();
 $db->cancelTransaction();
 ```
 
-### Fetch all data
+### FETCH ALL data
 
 ```php
 $records = $db->table('mytable')->findAll();
@@ -185,25 +94,25 @@ $records = $db->table('mytable')->columns('column1', 'column2')->findAssoc();
 
 ```
 
-### Updates
+### UPDATE
 
 ```php
-$db->table('mytable')->where('id', 1)->save(['column1' => 'hey']);
+$db->table('mytable')->where('id', 1)->save(array('column1' => 'hey'));
 ```
 
 or
 
 ```php
-$db->table('mytable')->where('id', 1)->update(['column1' => 'hey']);
+$db->table('mytable')->where('id', 1)->update(array(('column1' => 'hey'));
 ```
 
-### Remove records
+### REMOVE records
 
 ```php
 $db->table('mytable')->where('column1', 10, '<')->remove();
 ```
 
-### Sorting
+### SORTING
 
 ```php
 $db->table('mytable')->asc('column1')->findAll();
@@ -227,19 +136,19 @@ Multiple sorting:
 $db->table('mytable')->asc('column1')->desc('column2')->findAll();
 ```
 
-### Limit and offset
+### LIMIT and OFFSET
 
 ```php
 $db->table('mytable')->limit(10)->offset(5)->findAll();
 ```
 
-### Fetch only some columns
+### Fetch only SOME COLUMNS
 
 ```php
 $db->table('mytable')->columns('column1', 'column2')->findAll();
 ```
 
-### Fetch only one column
+### Fetch only ONE COLUMN
 
 Many rows:
 
@@ -253,7 +162,7 @@ One row:
 $db->table('mytable')->findOneColumn('column1');
 ```
 
-### Cast
+### CAST (MSSQL AND POSTGRESQL ONLY)
 
 ```php
 //Int 
@@ -281,19 +190,19 @@ $db->cast('column_1', 'to_date_iso');
 $db->cast('column_1', 'to_date_br');
 ```
 
-### Current date
+### CURRENT DATE
 
 ```php
 $db->date();
 ```
 
-### Current timestamp
+### CURRENT TIMESTAMP
 
 ```php
 $db->timestamp();
 ```
 
-## Date difference
+## DATE DIFFERENCE (MSSQL AND POSTGRESQL ONLY)
 
 ```php
 // Difference in years
@@ -319,13 +228,13 @@ $db->datediff('second', '2011-12-29 23:00:00', '2011-12-31 01:00:00');
 ```
 
 
-### Custom select
+### CUSTOM SELECT
 
 ```php
 $db->table('mytable')->select(1)->where('id', 42)->findOne();
 ```
 
-### Select subquery
+### SELECT SUBQUERY
 
 ```php
 $subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
@@ -343,7 +252,7 @@ $db->table('mytable')
        ->findAll();
 ```
 
-### Case
+### CASE
 
 ```php
 $pg->table("mytable")
@@ -369,25 +278,25 @@ $pg->table("mytable")
    ->closeCase('result');
 ```
 
-### Distinct
+### DISTINCT
 
 ```php
 $db->table('mytable')->distinct('columnA')->findOne();
 ```
 
-### Group by
+### GROUP BY
 
 ```php
 $db->table('mytable')->groupBy('columnA')->findAll();
 ```
 
-### Count
+### COUNT
 
 ```php
 $db->table('mytable')->count();
 ```
 
-### Union
+### UNION
 
 ```php
 
@@ -396,13 +305,13 @@ $subquery = $db->table('another_table')->columns('column2')->where('column3', 'v
 $db->table('mytable')->columns('column2')->union($subquery)->findAll();
 ```
 
-### Sum
+### SUM
 
 ```php
 $db->table('mytable')->sum('columnB');
 ```
 
-### Sum column values during update
+### SUM column values during update
 
 Add the value 42 to the existing value of the column "mycolumn":
 
@@ -410,7 +319,7 @@ Add the value 42 to the existing value of the column "mycolumn":
 $db->table('mytable')->sumColumn('mycolumn', 42)->update();
 ```
 
-### Increment column
+### INCREMENT column
 
 Increment a column value in a single query:
 
@@ -418,7 +327,7 @@ Increment a column value in a single query:
 $db->table('mytable')->where('another_column', 42)->increment('my_column', 2);
 ```
 
-### Decrement column
+### DECREMENT column
 
 Decrement a column value in a single query:
 
@@ -426,13 +335,37 @@ Decrement a column value in a single query:
 $db->table('mytable')->where('another_column', 42)->decrement('my_column', 1);
 ```
 
-### Exists
+### EXISTS
 
 Returns true if a record exists otherwise false.
 
 ```php
 $db->table('mytable')->where('column1', 12)->exists();
 ```
+
+### ROW_NUMBER
+
+```php
+\\SELECT ( ROW_NUMBER() OVER ( PARTITION BY colum1, column2 ORDER BY columnOrderBy DESC ) ) AS alias FROM personagens
+$db->table("mytable")->rowNumber(array('colum1', 'column2'), 'columnOrderBy', 'DESC', 'alias')->findAll();
+
+\\or
+
+\\SELECT ( ROW_NUMBER() OVER ( ORDER BY columnOrderBy DESC ) ) AS alias FROM personagens
+$db->table("mytable")->rowNumber(null, 'columnOrderBy', 'ASC', 'alias')->findAll();
+````
+
+### RANK
+
+```php
+\\SELECT ( RANK() OVER ( PARTITION BY colum1, column2 ORDER BY columnOrderBy DESC ) ) AS alias FROM personagens
+$db->table("mytable")->rank(array('colum1', 'column2'), 'columnOrderBy', 'DESC', 'alias')->findAll();
+
+\\or
+
+\\SELECT ( RANK() OVER ( ORDER BY columnOrderBy DESC ) ) AS alias FROM personagens
+$db->table("mytable")->rank(null, 'columnOrderBy', 'ASC', 'alias')->findAll();
+````
 
 ### JOIN
 
@@ -455,7 +388,7 @@ or
 $db->table('mytable')->left('my_other_table as t1', 't1.id = mytable.foreign_key', 'right')->findAll();
 ```
 
-### Where condition
+### WHERE condition
 
 Prepared statement:
 
@@ -490,20 +423,25 @@ $db->table('mytable')
    ->findAll();
 ```
 
-### Not Equals condition
+### OR WHERE condition 
 
 Prepared statement:
 
 ```php
 $db->table('mytable')
-   ->neq('column1', 'hey')
+   ->where('column1', 'hey') //Defaults to = operator
+   ->orWhere('column2', 'hey', '!=')
+   ->orWhere('column3', '10', '>')
+   ->orWhere('column4', '10', '>=')
+   ->orWhere('column5', '10', '<')
+   ->orWhere('column6', '10', '<=')
    ->findAll();
 
 // or using a subquery
-$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3')->orWhere('column6', '10', '<=');
 
 $db->table('mytable')
-   ->neq($subquery)
+   ->where($subquery)
    ->findAll();
 ```
 
@@ -511,7 +449,12 @@ Unprepared statement:
 
 ```php
 $db->table('mytable')
-   ->neq('column1', 'column2', false)
+   ->where('column1', 'column7') //Defaults to = operator
+   ->orWhere('column2', 'column8', '!=', 'false')
+   ->orWhere('column3', 'column9', '>', 'false')
+   ->orWhere('column4', 'column10', '>=', 'false')
+   ->orWhere('column5', 'column11', '<', 'false')
+   ->orWhere('column6', 'column12', '<=', 'false')
    ->findAll();
 ```
 
@@ -521,7 +464,7 @@ Prepared statement:
 
 ```php
 $db->table('mytable')
-       ->whereIn('column1', ['hey', 'bla'])
+       ->whereIn('column1', array('hey', 'bla'))
        ->findAll();
 
 //or using a subquery
@@ -538,7 +481,38 @@ Unprepared statement:
 
 ```php
 $db->table('mytable')
-       ->whereIn('column1', ['column2', 'column2'], false)
+       ->whereIn('column1', array('column2', 'column2'), false)
+       ->findAll();
+```
+
+### OR IN condition
+
+Prepared statement:
+
+```php
+$db->table('mytable')
+       ->whereIn('column1', array('hey', 'bla'))
+       ->orWhereIn('column1', array('xxx', 'yyy'))
+       ->findAll();
+
+//or using a subquery
+
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
+$subquery2 = $db->table('another_table')->columns('column5')->where('column8', 'value9');
+
+$db->table('mytable')
+       ->columns('column_5')
+       ->whereIn($subquery)
+       ->orWhereIn($subquery2)
+       ->findAll();
+```
+
+Unprepared statement:
+
+```php
+$db->table('mytable')
+       ->whereIn('column1', array('column2', 'column2'), false)
+       ->orWhereIn('column1', array('column3', 'column3'), false)
        ->findAll();
 ```
 
@@ -548,7 +522,7 @@ Prepared statement:
 
 ```php
 $db->table('mytable')
-       ->whereNotIn('column1', ['hey', 'bla'])
+       ->whereNotIn('column1', array('hey', 'bla'))
        ->findAll();
 
 //or using a subquery
@@ -565,11 +539,42 @@ Unprepared statement:
 
 ```php
 $db->table('mytable')
-       ->whereNotIn('column1', ['column2', 'column2'], false)
+       ->whereNotIn('column1', array('column2', 'column2'), false)
        ->findAll();
 ```
 
-### Ilike condition
+### OR NOT IN condition
+
+Prepared statement:
+
+```php
+$db->table('mytable')
+       ->whereIn('column1', array('hey', 'bla'))
+       ->orWhereNotIn('column1', array('xxx', 'yyy'))
+       ->findAll();
+
+//or using a subquery
+
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
+$subquery2 = $db->table('another_table')->columns('column5')->where('column8', 'value9');
+
+$db->table('mytable')
+       ->columns('column_5')
+       ->whereIn($subquery)
+       ->orWhereNotIn($subquery2)
+       ->findAll();
+```
+
+Unprepared statement:
+
+```php
+$db->table('mytable')
+       ->whereIn('column1', array('column2', 'column2'), false)
+       ->orWhereNotIn('column1', array('column3', 'column3'), false)
+       ->findAll();
+```
+
+### ILIKE condition
 
 Not case-sensitive:
 
@@ -596,7 +601,38 @@ $db->table('mytable')
    ->findAll();
 ```
 
-### Not Ilike condition
+### OR ILIKE condition
+
+Not case-sensitive:
+
+Prepared statement:
+
+```php
+$db->table('mytable')
+   ->ilike('column1', '%foo%')
+   ->orIlike('column1', '%abc%')
+   ->findAll();
+
+//or using a subquery
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
+$subquery2 = $db->table('another_table')->columns('column3')->where('column4', 'value4');
+
+$db->table('mytable')
+   ->ilike($subquery)
+   ->orlike($subquery2)
+   ->findAll();
+```
+
+Unprepared statement:
+
+```php
+$db->table('mytable')
+   ->ilike('column1', 'column2', false)
+   ->orIlike('column3', 'column4', false)
+   ->findAll();
+```
+
+### NOT ILIKE condition
 
 Not case-sensitive:
 
@@ -623,6 +659,37 @@ $db->table('mytable')
    ->findAll();
 ```
 
+### OR NOT ILIKE condition
+
+Not case-sensitive:
+
+Prepared statement:
+
+```php
+$db->table('mytable')
+   ->ilike('column1', '%foo%')
+   ->orNotIlike('column1', '%abc%')
+   ->findAll();
+
+//or using a subquery
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
+$subquery2 = $db->table('another_table')->columns('column3')->where('column4', 'value4');
+
+$db->table('mytable')
+   ->ilike($subquery)
+   ->orNotIlike($subquery2)
+   ->findAll();
+```
+
+Unprepared statement:
+
+```php
+$db->table('mytable')
+   ->ilike('column1', 'column2', false)
+   ->orNotIlike('column3', 'column4', false)
+   ->findAll();
+```
+
 ### IS NULL condition
 
 ```php
@@ -635,6 +702,24 @@ $subquery = $db->table('another_table')->columns('column2')->where('column3', 'v
 
 $db->table('mytable')
    ->isNull($subquery)
+   ->findAll();
+```
+
+### OR IS NULL condition
+
+```php
+$db->table('mytable')
+   ->isNull('column1')
+   ->orIsNull('column2')
+   ->findAll();
+
+//or using a subquery
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
+$subquery2 = $db->table('another_table')->columns('column4')->where('column5', 'value5');
+
+$db->table('mytable')
+   ->isNull($subquery)
+   ->orIsNull($subquery2)
    ->findAll();
 ```
 
@@ -653,26 +738,50 @@ $db->table('mytable')
    ->findAll();
 ```
 
+### OR IS NOT NULL condition
+
+```php
+$db->table('mytable')
+   ->notNull('column1')
+   ->orNotNull('column2')
+   ->findAll();
+   
+//or using a subquery
+$subquery = $db->table('another_table')->columns('column2')->where('column3', 'value3');
+$subquery2 = $db->table('another_table')->columns('column4')->where('column5', 'value5');
+
+$db->table('mytable')
+   ->notNull($subquery)
+   ->orNotNull($subquery)
+   ->findAll();
+```
+
+
 ### Multiple conditions
 
-Add conditions are joined by a `AND`.
+How to make a subconditions inside `AND` condition:
 
 ```php
 $db->table('mytable')
     ->like('column2', '%mytable')
-    ->where('column1', 3, '>=')
+    ->beginAnd()
+    ->like('column2', '%mytable')
+    ->orWhere('column1', 3, '>=')
+    ->closeAnd()
+    ->orWhere('column5', 'titi')
     ->findAll();
 ```
 
-How to make a OR condition:
+How to make a subconditions inside `OR` condition:
 
 ```php
 $db->table('mytable')
+    ->like('column2', '%mytable')
     ->beginOr()
     ->like('column2', '%mytable')
     ->where('column1', 3, '>=')
     ->closeOr()
-    ->where('column5', 'titi')
+    ->orWhere('column5', 'titi')
     ->findAll();
 ```
 
@@ -684,212 +793,7 @@ Debug similar to ADOdb debug:
 $db->debug();
 ```
 
-Log generated queries:
-
-```php
-$db->getStatementHandler()->withLogging();
-```
-
-Mesure each query time:
-
-```php
-$db->getStatementHandler()->withStopWatch();
-```
-
-Get the number of queries executed:
-
-```php
-echo $db->getStatementHandler()->getNbQueries();
-```
-
-Get log messages:
-
-```php
-print_r($db->getLogMessages());
-```
-
-### Large objects (LOBs)
-
-Insert a file:
-
-```php
-$db->largeObject('my_table')->insertFromFile('blobColumn', '/path/to/file', array('id' => 'something'));
-```
-
-Insert from a stream:
-
-```php
-$db->largeObject('my_table')->insertFromStream('blobColumn', $fd, array('id' => 'something'));
-```
-
-Fetch a large object as a stream (Postgres only):
-
-```php
-$fd = $db->largeObject('my_table')->where('id', 'something')->findOneColumnAsStream('blobColumn');
-```
-
-Fetch a large object as a string:
-
-```php
-echo $db->largeObject('my_table')->where('id', 'something')->findOneColumnAsString('blobColumn');
-```
-
-Drivers:
-
-- Postgres
-    - Column type: `bytea`
-- Sqlite and Mysql
-    - Column type: `BLOB`
-    - PDO do no not supports the stream feature (returns a string instead)
-
-### Hashtable (key/value store)
-
-How to use a table as a key/value store:
-
-```php
-$db->execute(
-     'CREATE TABLE mytable (
-         column1 TEXT NOT NULL UNIQUE,
-         column2 TEXT default NULL
-     )'
-);
-
-$db->table('mytable')->insert(['column1' => 'option1', 'column2' => 'value1']);
-```
-
-Add/Replace some values:
-
-```php
-$db->hashtable('mytable')
-   ->columnKey('column1')
-   ->columnValue('column2')
-   ->put(['option1' => 'new value', 'option2' => 'value2']));
-```
-
-Get all values:
-
-```php
-$result = $db->hashtable('mytable')->columnKey('column1')->columnValue('column2')->get();
-print_r($result);
-
-Array
-(
-    [option2] => value2
-    [option1] => new value
-)
-```
-
-or
-
-```php
-$result = $db->hashtable('mytable')->getAll('column1', 'column2');
-```
-
-Get a specific value:
-
-```php
-$db->hashtable('mytable')
-   ->columnKey('column1')
-   ->columnValue('column2')
-   ->put(['option3' => 'value3']);
-
-$result = $db->hashtable('mytable')
-             ->columnKey('column1')
-             ->columnValue('column2')
-             ->get('option1', 'option3');
-
-print_r($result);
-
-Array
-(
-    [option1] => new value
-    [option3] => value3
-)
-```
-
-### Schema migrations
-
-#### Define a migration
-
-- Migrations are defined in simple functions inside a namespace named "Schema".
-- An instance of PDO is passed to first argument of the function.
-- Function names has the version number at the end.
-
-Example:
-
-```php
-namespace Schema;
-
-function version_1($pdo)
-{
-    $pdo->exec('
-        CREATE TABLE users (
-            id INTEGER PRIMARY KEY,
-            name TEXT UNIQUE,
-            email TEXT UNIQUE,
-            password TEXT
-        )
-    ');
-}
-
-
-function version_2($pdo)
-{
-    $pdo->exec('
-        CREATE TABLE tags (
-            id INTEGER PRIMARY KEY,
-            name TEXT UNIQUE
-        )
-    ');
-}
-```
-
-#### Run schema update automatically
-
-- The method `check()` execute all migrations until the version specified
-- If an error occurs, the transaction is rollbacked
-- Foreign keys checks are disabled if possible during the migration
-
-Example:
-
-```php
-$last_schema_version = 5;
-
-$db = new AdamDb\Database(array(
-    'driver' => 'sqlite',
-    'filename' => '/tmp/mydb.sqlite'
-));
-
-if ($db->schema()->check($last_schema_version)) {
-
-    // Do something...
-}
-else {
-
-    die('Unable to migrate database schema.');
-}
-```
-
-### Use a singleton to handle database instances
-
-Setup a new instance:
-
-```php
-AdamDb\Database::setInstance('myinstance', function() {
-
-    $db = new AdamDb\Database(array(
-        'driver' => 'sqlite',
-        'filename' => DB_FILENAME
-    ));
-
-    if ($db->schema()->check(DB_VERSION)) {
-        return $db;
-    }
-    else {
-        die('Unable to migrate database schema.');
-    }
-});
-```
+### Instance
 
 Get this instance anywhere in your code:
 

@@ -414,10 +414,10 @@ class Table
      * @param  string  $alias
      * @return $this
      */
-    public function rowNumber(array $columns, $orderByColumn, $order = self::SORT_ASC, $alias = NULL)
+    public function rowNumber($columns, $orderByColumn, $order = self::SORT_ASC, $alias = NULL)
     {   
         $sqlRowNumber = ' ( ROW_NUMBER() OVER (';
-        if(!empty($columns)) {
+        if(is_array($columns) && !empty($columns)) {
             $sqlRowNumber .= ' PARTITION BY '.implode(', ', $columns);
         }
         $sqlRowNumber .= ' ORDER BY '.$this->db->escapeIdentifier($orderByColumn).' '.$order.' ) )';
@@ -439,10 +439,10 @@ class Table
      * @param  string  $alias
      * @return $this
      */
-    public function rank(array $columns, $orderByColumn, $order = self::SORT_ASC, $alias = NULL)
+    public function rank($columns, $orderByColumn, $order = self::SORT_ASC, $alias = NULL)
     {   
         $sqlRank = ' ( RANK() OVER (';
-        if(!empty($columns)) {
+        if(is_array($columns) && !empty($columns)) {
             $sqlRank .= ' PARTITION BY '.implode(', ', $columns);
         }
         $sqlRank .= ' ORDER BY '.$this->db->escapeIdentifier($orderByColumn).' '.$order.' ) )';

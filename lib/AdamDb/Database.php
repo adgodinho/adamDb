@@ -210,9 +210,7 @@ class Database
      */
     public function debug()
     {
-        $this->statementHandler->withLogging();
-        $this->statementHandler->withDebugging();
-        return $this->statementHandler;
+        $this->getConnection()->debug = true;
     }
 
     /**
