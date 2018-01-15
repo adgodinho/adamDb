@@ -37,7 +37,12 @@ class InsertBuilder extends BaseBuilder
             'INSERT INTO %s (%s) VALUES (%s)',
             $this->db->escapeIdentifier($this->table),
             implode(', ', array_keys($this->columns)),
-            implode(', ', array_values($this->columns))
+            implode(', ', array_map(array($this, 'escapeValues'), array_values($this->columns)))
         );
+    }
+
+    public function escapeValues($value) 
+    {
+        return "'".$value."'";
     }
 }
