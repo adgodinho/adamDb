@@ -419,6 +419,56 @@ class Table
     }
 
     /**
+     * Build a ROW_NUMBER() function
+     *
+     * @access public
+     * @param  array   $columns
+     * @param  string  $orderByColumn
+     * @param  string  $order
+     * @param  string  $alias
+     * @return $this
+     */
+    public function rowNumber(array $columns, $orderByColumn, $order = self::SORT_ASC, $alias = NULL)
+    {   
+        $sqlRowNumber = ' ( ROW_NUMBER() OVER (';
+        if(!empty($columns)) {
+            $sqlRowNumber .= ' PARTITION BY '.implode(', ', $columns);
+        }
+        $sqlRowNumber .= ' ORDER BY '.$this->db->escapeIdentifier($orderByColumn).' '.$order.' ) )';
+
+        if(!is_null($alias)) {
+            $sqlRowNumber .= ' AS '.$this->db->escapeIdentifier($alias);;
+        }
+        $this->columns[] = $sqlRowNumber;
+        return $this;
+    }
+
+    /**
+     * Build a ROW_NUMBER() function
+     *
+     * @access public
+     * @param  array   $columns
+     * @param  string  $orderByColumn
+     * @param  string  $order
+     * @param  string  $alias
+     * @return $this
+     */
+    public function rank(array $columns, $orderByColumn, $order = self::SORT_ASC, $alias = NULL)
+    {   
+        $sqlRank = ' ( RANK() OVER (';
+        if(!empty($columns)) {
+            $sqlRank .= ' PARTITION BY '.implode(', ', $columns);
+        }
+        $sqlRank .= ' ORDER BY '.$this->db->escapeIdentifier($orderByColumn).' '.$order.' ) )';
+
+        if(!is_null($alias)) {
+            $sqlRank .= ' AS '.$this->db->escapeIdentifier($alias);;
+        }
+        $this->columns[] = $sqlRank;
+        return $this;
+    }
+
+    /**
      * Exists
      *
      * @access public
