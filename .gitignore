@@ -40,6 +40,7 @@ Thumbs.db
 
 # App specific #
 ################
+lib/adodb5
 index.php
 example.php
 vendorindex.php

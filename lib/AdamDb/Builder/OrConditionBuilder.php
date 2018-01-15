@@ -35,8 +35,12 @@ class OrConditionBuilder
      * @access public
      * @return string
      */
-    public function build()
-    {
-        return '('.implode(' OR ', $this->conditions).')';
+    public function build($and = false)
+    {   
+        if($and) {
+            return ' AND ('.implode(' OR ', $this->conditions).')';
+        } else {
+            return ' ('.implode(' OR ', $this->conditions).')';
+        }
     }
 }

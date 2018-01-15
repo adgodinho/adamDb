@@ -37,6 +37,6 @@ class CaseConditionBuilder
      */
     public function build()
     {
-        return '( CASE '.implode(' ', $this->conditions);
+        return ' ( CASE '.implode(' ', $this->conditions);
     }
 }

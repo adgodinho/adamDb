@@ -96,9 +96,9 @@ class ConditionBuilder
     public function build()
     {   
         if($this->case) {
-            return empty($this->conditions) ? '' : ' '.implode(' AND ', $this->conditions);
+            return empty($this->conditions) ? '' : ' '.implode('', $this->conditions);
         } else {
-            return empty($this->conditions) ? '' : ' WHERE '.implode(' AND ', $this->conditions);
+            return empty($this->conditions) ? '' : ' WHERE '.implode('', $this->conditions);
         }
     }
 
@@ -188,7 +188,7 @@ class ConditionBuilder
     public function beginCase()
     {
         $this->caseConditionOffset++;
-        $this->caseConditions[$this->caseConditionOffset] = new CaseConditionBuilder();
+        $this->caseConditions[$this->caseConditionOffset] = new CaseConditionBuilder(!empty($this->conditions));
     }
 
     /**
@@ -280,15 +280,20 @@ class ConditionBuilder
                $column = func_get_arg(0);
         }
 
+        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+
         if($value instanceof Table) {
-            $this->addCondition($this->db->escapeIdentifier($column).' '.$operator.' ('.$value->buildSelectQuery().')');
+            $condition .= $this->db->escapeIdentifier($column).' '.$operator.' ('.$value->buildSelectQuery().')';
+            $this->addCondition($condition);
             $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
             if($prepared) {
-                $this->addCondition($this->db->escapeIdentifier($column).' '.$operator.' ?');
+                $condition .= $this->db->escapeIdentifier($column).' '.$operator.' ?';
+                $this->addCondition($condition);
                 $this->values[] = $value;
             } else {
-                $this->addCondition($this->db->escapeIdentifier($column).' '.$operator.' '.$this->db->escapeIdentifier($value));
+                $condition .= $this->db->escapeIdentifier($column).' '.$operator.' '.$this->db->escapeIdentifier($value);
+                $this->addCondition($condition);
             }
         }
     }
@@ -302,17 +307,22 @@ class ConditionBuilder
      */
     public function whereIn($column, $values, $prepared = true)
     {
+        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+
         if($values instanceof Table) {
-            $this->addCondition($this->db->escapeIdentifier($column).' IN ('.$values->buildSelectQuery().')');
+            $condition .= $this->db->escapeIdentifier($column).' IN ('.$values->buildSelectQuery().')';
+            $this->addCondition($condition);
             $this->values = array_merge($this->values, $values->getConditionBuilder()->getValues());
         } elseif(is_array($values)) {
             if ($prepared) {
                 if (! empty($values)) {
-                    $this->addCondition($this->db->escapeIdentifier($column).' IN ('.implode(', ', array_fill(0, count($values), '?')).')');
+                    $condition .= $this->db->escapeIdentifier($column).' IN ('.implode(', ', array_fill(0, count($values), '?')).')';
+                    $this->addCondition($condition);
                     $this->values = array_merge($this->values, $values);
                 }
             } else {
-                $this->addCondition($this->db->escapeIdentifier($column).' IN ('.$this->db->escapeIdentifier(implode(', ', $values)).')');
+                $condition .= $this->db->escapeIdentifier($column).' IN ('.$this->db->escapeIdentifier(implode(', ', $values)).')';
+                $this->addCondition($condition);
             }
         }
     }
@@ -326,17 +336,22 @@ class ConditionBuilder
      */
     public function whereNotIn($column, $values, $prepared = true)
     {
+        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+
         if($values instanceof Table) {
-            $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.$values->buildSelectQuery().')');
+            $condition .= $this->db->escapeIdentifier($column).' NOT IN ('.$values->buildSelectQuery().')';
             $this->values = array_merge($this->values, $values->getConditionBuilder()->getValues());
+            $this->addCondition($condition);
         } elseif(is_array($values)) {
             if($prepared) {
                 if (! empty($values)) {
-                    $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.implode(', ', array_fill(0, count($values), '?')).')');
+                    $condition .= $this->db->escapeIdentifier($column).' NOT IN ('.implode(', ', array_fill(0, count($values), '?')).')';
+                    $this->addCondition($condition);
                     $this->values = array_merge($this->values, $values);
                 }
             } else {
-                $this->addCondition($this->db->escapeIdentifier($column).' NOT IN ('.$this->db->escapeIdentifier(implode(', ', $values)).')');
+                $condition .= $this->db->escapeIdentifier($column).' NOT IN ('.$this->db->escapeIdentifier(implode(', ', $values)).')';
+                $this->addCondition($condition);
             }
         }
     }
@@ -351,10 +366,14 @@ class ConditionBuilder
      */
     public function addSubquery(Table $subquery, $alias = NULL)
     {
+        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+           
         if(is_null($alias)) {
-            $this->addCondition('('.$subquery->buildSelectQuery().')');
+            $condition .= ' ('.$subquery->buildSelectQuery().')';
+            $this->addCondition($condition);
         } else {
-            $this->addCondition('('.$subquery->buildSelectQuery().') AS '.$this->db->escapeIdentifier($alias));
+            $condition .= ' ('.$subquery->buildSelectQuery().') AS '.$this->db->escapeIdentifier($alias);
+            $this->addCondition($condition);
         }
 
         $this->values = array_merge($this->values, $subquery->getConditionBuilder()->getValues());
@@ -370,15 +389,20 @@ class ConditionBuilder
      */
     private function like($column, $value, $prepared = true)
     {
+        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+
         if($value instanceof Table) {
-            $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ('.$value->buildSelectQuery().')');
+            $condition .= $this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ('.$value->buildSelectQuery().')';
+            $this->addCondition($condition);
             $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
             if($prepared) {
-                $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ?');
+                $condition .= $this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ?';
+                $this->addCondition($condition);
                 $this->values[] = $value;
             } else {
-                $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' '.$this->db->escapeIdentifier($value));
+                $condition .= ' AND '.$this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' '.$this->db->escapeIdentifier($value);
+                $this->addCondition($condition);
             }
         }
     }
@@ -392,15 +416,20 @@ class ConditionBuilder
      */
     private function notLike($column, $value, $prepared = true)
     {
+        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+
         if($value instanceof Table) {
-            $this->addCondition($this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('LIKE').' ('.$value->buildSelectQuery().')');
+            $condition .= $this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('LIKE').' ('.$value->buildSelectQuery().')';
+            $this->addCondition($condition);
             $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
             if($prepared) {
-                $this->addCondition($this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('LIKE').' ?');
+                $condition .= $this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('LIKE').' ?';
+                $this->addCondition($condition);
                 $this->values[] = $value;
             } else {
-                $this->addCondition($this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('LIKE').' '.$this->db->escapeIdentifier($value));
+                $condition .= $this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('LIKE').' '.$this->db->escapeIdentifier($value);
+                $this->addCondition($condition);
             }
         }
     }
@@ -414,15 +443,20 @@ class ConditionBuilder
      */
     public function ilike($column, $value, $prepared = true)
     {
+        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+
         if($value instanceof Table) {
-            $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ('.$value->buildSelectQuery().')');
+            $condition .= $this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ('.$value->buildSelectQuery().')';
+            $this->addCondition($condition);
             $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
             if($prepared) {
-                $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ?');
+                $condition .= $this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ?';
+                $this->addCondition();
                 $this->values[] = $value;
             } else {
-                $this->addCondition($this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' '.$this->db->escapeIdentifier($value));
+                $condition .= $this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' '.$this->db->escapeIdentifier($value);
+                $this->addCondition($condition);
             }
         }
     }
@@ -436,15 +470,20 @@ class ConditionBuilder
      */
     public function notIlike($column, $value, $prepared = true)
     {
+        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+
         if($value instanceof Table) {
-            $this->addCondition($this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('ILIKE').' ('.$value->buildSelectQuery().')');
+            $condition .= $this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('ILIKE').' ('.$value->buildSelectQuery().')';
+            $this->addCondition($condition);
             $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
             if($prepared) {
-                $this->addCondition($this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('ILIKE').' ?');
+                $condition .= $this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('ILIKE').' ?';
+                $this->addCondition($condition);
                 $this->values[] = $value;
             } else {
-                $this->addCondition($this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('ILIKE').' '.$this->db->escapeIdentifier($value));
+                $condition .= $this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('ILIKE').' '.$this->db->escapeIdentifier($value);
+                $this->addCondition($condition);
             }
         }
     }
@@ -457,11 +496,15 @@ class ConditionBuilder
      */
     public function isNull($value)
     {
+        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+
         if($value instanceof Table) {
-            $this->addCondition('('.$value->buildSelectQuery().') IS NULL');
+            $condition .= ' ('.$value->buildSelectQuery().') IS NULL';
+            $this->addCondition($condition);
             $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($value).' IS NULL');
+            $condition .= ' '.$this->db->escapeIdentifier($value).' IS NULL';
+            $this->addCondition($condition);
         }
     }
 
@@ -473,11 +516,15 @@ class ConditionBuilder
      */
     public function notNull($value)
     {
+        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+
         if($value instanceof Table) {
-            $this->addCondition('('.$value->buildSelectQuery().') IS NOT NULL');
+            $condition .= ' ('.$value->buildSelectQuery().') IS NOT NULL';
+            $this->addCondition($condition);
             $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
         } else {
-            $this->addCondition($this->db->escapeIdentifier($value).' IS NOT NULL');
+            $condition .= ' '.$this->db->escapeIdentifier($value).' IS NOT NULL';
+            $this->addCondition($condition);
         }
     }
 }
