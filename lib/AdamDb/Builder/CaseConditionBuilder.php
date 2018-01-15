@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class OrConditionBuilder
+ * Class CaseConditionBuilder
  *
  * @package PicoDb\Builder
  * @author  Frederic Guillot

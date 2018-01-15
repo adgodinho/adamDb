@@ -36,22 +36,6 @@ class ConditionBuilder
     private $conditions = array();
 
     /**
-     * SQL OR conditions
-     *
-     * @access private
-     * @var    OrConditionBuilder[]
-     */
-    private $orConditions = array();
-
-    /**
-     * SQL or condition offset
-     *
-     * @access private
-     * @var int
-     */
-    private $orConditionOffset = 0;
-
-    /**
      * SQL CASE conditions
      *
      * @access private
@@ -66,6 +50,14 @@ class ConditionBuilder
      * @var int
      */
     private $caseConditionOffset = 0;
+
+    /**
+     * SQL case condition offset
+     *
+     * @access private
+     * @var int
+     */
+    private $conditionOffset = 0;
 
     /**
      * Use CASE or not?
@@ -136,6 +128,24 @@ class ConditionBuilder
     }
 
     /**
+     * Decides if connector should be added or not
+     *
+     * @access public
+     * @return String
+     */
+    public function getConnector($connector)
+    {
+        if($this->conditionOffset > 0) {
+            $this->conditionOffset--;
+            return '';
+        } else if(empty($this->conditions)){
+            return '';
+        } else {
+            return $connector;
+        }
+    }
+
+    /**
      * Add custom condition
      *
      * @access public
@@ -143,9 +153,7 @@ class ConditionBuilder
      */
     public function addCondition($sql)
     {
-        if ($this->orConditionOffset > 0) {
-            $this->orConditions[$this->orConditionOffset]->withCondition($sql);
-        } else if ($this->caseConditionOffset > 0) {
+        if ($this->caseConditionOffset > 0) {
             $this->caseConditions[$this->caseConditionOffset]->withCondition($sql);
         } else {
             $this->conditions[] = $sql;
@@ -159,8 +167,8 @@ class ConditionBuilder
      */
     public function beginOr()
     {
-        $this->orConditionOffset++;
-        $this->orConditions[$this->orConditionOffset] = new OrConditionBuilder();
+        $this->addCondition(' OR ( ');
+        $this->conditionOffset++;
     }
 
     /**
@@ -170,14 +178,28 @@ class ConditionBuilder
      */
     public function closeOr()
     {
-        $condition = $this->orConditions[$this->orConditionOffset]->build();
-        $this->orConditionOffset--;
+        $this->addCondition(' ) ');
+    }
 
-        if ($this->orConditionOffset > 0) {
-            $this->orConditions[$this->orConditionOffset]->withCondition($condition);
-        } else {
-            $this->conditions[] = $condition;
-        }
+    /**
+     * Start OR condition
+     *
+     * @access public
+     */
+    public function beginAnd()
+    {
+        $this->addCondition(' AND ( ');
+        $this->conditionOffset++;
+    }
+
+    /**
+     * Close OR condition
+     *
+     * @access public
+     */
+    public function closeAnd()
+    {
+        $this->addCondition(' ) ');
     }
 
     /**
@@ -254,7 +276,7 @@ class ConditionBuilder
     }
 
     /**
-     * Equal condition
+     * AND Equal condition
      *
      * @access public
      * @param  string   $column
@@ -280,7 +302,7 @@ class ConditionBuilder
                $column = func_get_arg(0);
         }
 
-        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+        $condition = $this->getConnector(' AND ');
 
         if($value instanceof Table) {
             $condition .= $this->db->escapeIdentifier($column).' '.$operator.' ('.$value->buildSelectQuery().')';
@@ -299,15 +321,61 @@ class ConditionBuilder
     }
 
     /**
-     * IN condition
+     * OR Equal condition
+     *
+     * @access public
+     * @param  string   $column
+     * @param  mixed    $value
+     */
+    public function orWhere()
+    {
+        $prepared = true;
+        $operator = '=';
+        $numArgs = func_num_args();
+        switch ($numArgs) {
+            case 4:
+                $prepared = func_get_arg(3);
+            case 3:
+                if(gettype(func_get_arg(2)) == 'boolean') {
+                    $prepared = func_get_arg(2);
+                } else {
+                    $operator = func_get_arg(2);
+                }
+            case 2:
+                $value = func_get_arg(1);
+            case 1:
+               $column = func_get_arg(0);
+        }
+
+         $condition = $this->getConnector(' OR ');
+
+        if($value instanceof Table) {
+            $condition .= $this->db->escapeIdentifier($column).' '.$operator.' ('.$value->buildSelectQuery().')';
+            $this->addCondition($condition);
+            $this->values = array_merge($this->values, $value->getConditionBuilder()->getValues());
+        } else {
+            if($prepared) {
+                $condition .= $this->db->escapeIdentifier($column).' '.$operator.' ?';
+                $this->addCondition($condition);
+                $this->values[] = $value;
+            } else {
+                $condition .= $this->db->escapeIdentifier($column).' '.$operator.' '.$this->db->escapeIdentifier($value);
+                $this->addCondition($condition);
+            }
+        }
+    }
+
+    /**
+     * AND IN condition
      *
      * @access public
      * @param  string   $column
      * @param  mixed    $values
+     * @param  boolean  $prepared
      */
-    public function whereIn($column, $values, $prepared = true)
+    public function whereIn($column, $values, $prepared = true, $connector = ' AND ')
     {
-        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+        $condition = $this->getConnector($connector);
 
         if($values instanceof Table) {
             $condition .= $this->db->escapeIdentifier($column).' IN ('.$values->buildSelectQuery().')';
@@ -328,15 +396,29 @@ class ConditionBuilder
     }
 
     /**
-     * NOT IN condition
+     * OR IN condition
      *
      * @access public
      * @param  string   $column
      * @param  mixed    $values
+     * @param  boolean  $prepared
      */
-    public function whereNotIn($column, $values, $prepared = true)
+    public function orWhereIn($column, $values, $prepared = true, $connector = ' OR ')
     {
-        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+        return $this->whereIn($column, $values, $prepared, $connector);
+    }
+
+    /**
+     * AND NOT IN condition
+     *
+     * @access public
+     * @param  string   $column
+     * @param  mixed    $values
+     * @param  boolean  $prepared
+     */
+    public function whereNotIn($column, $values, $prepared = true, $connector = ' AND ')
+    {
+        $condition = $this->getConnector($connector);
 
         if($values instanceof Table) {
             $condition .= $this->db->escapeIdentifier($column).' NOT IN ('.$values->buildSelectQuery().')';
@@ -357,16 +439,29 @@ class ConditionBuilder
     }
 
     /**
-     * Build a subquery from a Table query with an alias
+     * OR NOT IN condition
+     *
+     * @access public
+     * @param  string   $column
+     * @param  mixed    $values
+     * @param  boolean  $prepared
+     */
+    public function orWhereNotIn($column, $values, $prepared = true, $connector = ' OR ')
+    {
+        return $this->whereNotIn($column, $values, $prepared, $connector);
+    }
+
+    /**
+     * Build a AND subquery from a Table query with an alias
      *
      * @access public
      * @param  Table  $subquery
      * @param  string  $alias
      * @return $this
      */
-    public function addSubquery(Table $subquery, $alias = NULL)
+    public function addSubquery(Table $subquery, $alias = NULL, $connector = ' AND ')
     {
-        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+        $condition = $this->getConnector($connector);
            
         if(is_null($alias)) {
             $condition .= ' ('.$subquery->buildSelectQuery().')';
@@ -381,15 +476,29 @@ class ConditionBuilder
     }
 
     /**
-     * LIKE condition
+     * Build a OR subquery from a Table query with an alias
+     *
+     * @access public
+     * @param  Table  $subquery
+     * @param  string  $alias
+     * @return $this
+     */
+    public function orAddSubquery(Table $subquery, $alias = NULL, $connector = ' OR ')
+    {
+        return $this->addSubquery($subquery, $alias, $connector);
+    }
+
+    /**
+     * AND LIKE condition
      *
      * @access public
      * @param  string   $column
      * @param  mixed    $value
+     * @param  boolean  $prepared
      */
-    private function like($column, $value, $prepared = true)
+    private function like($column, $value, $prepared = true, $connector = ' AND ')
     {
-        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+        $condition = $this->getConnector($connector);
 
         if($value instanceof Table) {
             $condition .= $this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('LIKE').' ('.$value->buildSelectQuery().')';
@@ -408,15 +517,28 @@ class ConditionBuilder
     }
 
     /**
-     * LIKE condition
+     * OR LIKE condition
      *
      * @access public
      * @param  string   $column
      * @param  mixed    $value
      */
-    private function notLike($column, $value, $prepared = true)
+    private function orLike($column, $value, $prepared = true, $connector = ' OR ')
     {
-        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+        return $this->like($column, $value, $prepared, $connector);
+    }
+
+    /**
+     * AND NOT LIKE condition
+     *
+     * @access public
+     * @param  string   $column
+     * @param  mixed    $value
+     * @param  boolean  $prepared
+     */
+    private function notLike($column, $value, $prepared = true, $connector = ' AND ')
+    {
+        $condition = $this->getConnector($connector);
 
         if($value instanceof Table) {
             $condition .= $this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('LIKE').' ('.$value->buildSelectQuery().')';
@@ -435,15 +557,29 @@ class ConditionBuilder
     }
 
     /**
-     * ILIKE condition
+     * OR NOT LIKE condition
      *
      * @access public
      * @param  string   $column
      * @param  mixed    $value
+     * @param  boolean  $prepared
      */
-    public function ilike($column, $value, $prepared = true)
+    private function orNotLike($column, $value, $prepared = true, $connector = ' OR ')
     {
-        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+        return $this->notLike($column, $value, $prepared, $connector);
+    }
+
+    /**
+     * AND ILIKE condition
+     *
+     * @access public
+     * @param  string   $column
+     * @param  mixed    $value
+     * @param  boolean  $prepared
+     */
+    public function ilike($column, $value, $prepared = true, $connector = ' AND ')
+    {
+        $condition = $this->getConnector($connector);
 
         if($value instanceof Table) {
             $condition .= $this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ('.$value->buildSelectQuery().')';
@@ -452,7 +588,7 @@ class ConditionBuilder
         } else {
             if($prepared) {
                 $condition .= $this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' ?';
-                $this->addCondition();
+                $this->addCondition($condition);
                 $this->values[] = $value;
             } else {
                 $condition .= $this->db->escapeIdentifier($column).' '.$this->db->getDriver()->getOperator('ILIKE').' '.$this->db->escapeIdentifier($value);
@@ -461,16 +597,30 @@ class ConditionBuilder
         }
     }
 
-        /**
-     * NOT ILIKE condition
+    /**
+     * OR ILIKE condition
      *
      * @access public
      * @param  string   $column
      * @param  mixed    $value
+     * @param  boolean  $prepared
      */
-    public function notIlike($column, $value, $prepared = true)
+    public function orIlike($column, $value, $prepared = true, $connector = ' OR ')
     {
-        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+        return $this->ilike($column, $value, $prepared, $connector);
+    }
+
+    /**
+     * AND NOT ILIKE condition
+     *
+     * @access public
+     * @param  string   $column
+     * @param  mixed    $value
+     * @param  boolean  $prepared
+     */
+    public function notIlike($column, $value, $prepared = true, $connector = ' AND ')
+    {
+        $condition = $this->getConnector($connector);
 
         if($value instanceof Table) {
             $condition .= $this->db->escapeIdentifier($column).' NOT '.$this->db->getDriver()->getOperator('ILIKE').' ('.$value->buildSelectQuery().')';
@@ -489,14 +639,27 @@ class ConditionBuilder
     }
 
     /**
-     * IS NULL condition
+     * OR NOT ILIKE condition
+     *
+     * @access public
+     * @param  string   $column
+     * @param  mixed    $value
+     * @param  boolean  $prepared
+     */
+    public function orNotIlike($column, $value, $prepared = true, $connector = ' OR ')
+    {
+        return $this->notIlike($column, $value, $prepared, $connector);
+    }
+
+    /**
+     * AND IS NULL condition
      *
      * @access public
      * @param  mixed   $value
      */
-    public function isNull($value)
+    public function isNull($value, $connector = ' AND ')
     {
-        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+        $condition = $this->getConnector($connector);
 
         if($value instanceof Table) {
             $condition .= ' ('.$value->buildSelectQuery().') IS NULL';
@@ -509,14 +672,27 @@ class ConditionBuilder
     }
 
     /**
-     * IS NOT NULL condition
+     * OR IS NULL condition
+     *
+     * @access public
+     * @param  mixed   $value
+     * @param  boolean  $prepared
+     */
+    public function orIsNull($value, $connector = ' OR ')
+    {
+        return $this->isNull($value, $connector);
+    }
+
+    /**
+     * AND IS NOT NULL condition
      *
      * @access public
      * @param  mixed  $value
+     * @param  boolean  $prepared
      */
-    public function notNull($value)
+    public function notNull($value, $connector = ' AND ')
     {
-        (empty($this->conditions)) ? $condition = '' : $condition = ' AND ';
+        $condition = $this->getConnector($connector);
 
         if($value instanceof Table) {
             $condition .= ' ('.$value->buildSelectQuery().') IS NOT NULL';
@@ -526,5 +702,17 @@ class ConditionBuilder
             $condition .= ' '.$this->db->escapeIdentifier($value).' IS NOT NULL';
             $this->addCondition($condition);
         }
+    }
+
+    /**
+     * OR IS NOT NULL condition
+     *
+     * @access public
+     * @param  mixed  $value
+     * @param  boolean  $prepared
+     */
+    public function orNotNull($value, $connector = ' OR ')
+    {
+        return $this->notNull($value, $connector);
     }
 }
