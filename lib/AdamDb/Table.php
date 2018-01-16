@@ -637,7 +637,7 @@ class Table
             }
         } else {
             if (! is_null($value)) {
-                $this->sqlLimit = ' LIMIT ('.(int) $value.')';
+                $this->sqlLimit = ' LIMIT '.(int) $value;
             }
         }
 
