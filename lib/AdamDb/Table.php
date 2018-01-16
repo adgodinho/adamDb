@@ -486,8 +486,7 @@ class Table
             $this->db->escapeIdentifier($this->name)
         );
 
-        $rq = $this->db->execute($sql, $this->conditionBuilder->getValues());
-        $result = $rq->fetchColumn();
+        $result = $this->db->execute($sql, $this->conditionBuilder->getValues())->fields['count'];
 
         return $result ? (int) $result : 0;
     }
