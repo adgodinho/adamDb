@@ -364,7 +364,7 @@ class Table
         $this->limit(1);
         $this->columns = array($column);
 
-        return $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues())->fetchColumn()->getRows();
+        return array_pop($this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues())->fields);
     }
 
     /**
@@ -467,8 +467,7 @@ class Table
             $this->db->escapeIdentifier($this->name)
         );
 
-        $rq = $this->db->execute($sql, $this->conditionBuilder->getValues());
-        $result = $rq->fetchColumn();
+        $result = array_pop($this->db->execute($sql, $this->conditionBuilder->getValues())->fields);
 
         return $result ? true : false;
     }
@@ -486,7 +485,7 @@ class Table
             $this->db->escapeIdentifier($this->name)
         );
 
-        $result = $this->db->execute($sql, $this->conditionBuilder->getValues())->fields['count'];
+        $result = array_pop($this->db->execute($sql, $this->conditionBuilder->getValues())->fields);
 
         return $result ? (int) $result : 0;
     }
@@ -506,8 +505,7 @@ class Table
             $this->db->escapeIdentifier($this->name)
         );
 
-        $rq = $this->db->execute($sql, $this->conditionBuilder->getValues());
-        $result = $rq->fetchColumn();
+        $result = array_pop($this->db->execute($sql, $this->conditionBuilder->getValues())->fields);
 
         return $result ? (float) $result : 0;
     }
@@ -639,7 +637,7 @@ class Table
             }
         } else {
             if (! is_null($value)) {
-                $this->sqlLimit = ' LIMIT '.(int) $value;
+                $this->sqlLimit = ' LIMIT ('.(int) $value.')';
             }
         }
 
@@ -656,7 +654,7 @@ class Table
     public function offset($value)
     {
         if (! is_null($value)) {
-            $this->sqlOffset = ' OFFSET '.(int) $value;
+            $this->sqlOffset = ' OFFSET ('.(int) $value.')';
         }
 
         return $this;
