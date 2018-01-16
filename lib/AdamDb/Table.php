@@ -813,28 +813,32 @@ class Table
         $this->name = $this->db->escapeIdentifier($this->name);
         $conditions = $this->conditionBuilder->build();
 
-        if(($this->db->getDriver() instanceof Mssql) && !empty($this->sqlOffset)) {
-            if(!empty($this->sqlTop) && !empty($this->sqlOrder)) {
-                $this->name = trim(sprintf(
-                    '(SELECT %s, ROW_NUMBER() OVER (%s) AS SEQUENCE FROM %s)t',
-                    $this->sqlSelect,
-                    $this->sqlOrder,
-                    $this->name
-                ));
-
-                $this->sqlOffset = preg_replace('/\D/', '', $this->sqlOffset);
-                $this->sqlTop = preg_replace('/\D/', '', $this->sqlTop);
-                $start = ((int)$this->sqlOffset) + 1;
-                $end = ((int)$this->sqlTop) + ((int)$this->sqlOffset);
-                if(!empty($conditions)) {
-                   $conditions .= ' AND SEQUENCE BETWEEN '.$start.' AND '.$end;
-                } else {
-                    $conditions .= ' WHERE SEQUENCE BETWEEN '.$start.' AND '.$end;
-                }
-                $this->sqlTop = $this->sqlOrder = $this->sqlOffset = '';
-            } else {
-                throw new SQLException("MSSQL offset() only works in conjunction with limit() and orderBy().");
+        if(($this->db->getDriver() instanceof Mssql) && !empty($this->sqlTop) && !empty($this->sqlOffset)) {
+            if(empty($this->sqlOrder)) {
+                $debug = $this->db->getConnection()->debug;
+                $this->db->getConnection()->debug = false;
+                $metaPrimaryKeys = $this->db->getConnection()->metaPrimaryKeys($this->name);
+                $this->db->getConnection()->debug = $debug;
+                $this->sqlOrder = 'ORDER BY '.implode(', ', array_values( $metaPrimaryKeys)).' ASC';
             }
+
+            $this->name = trim(sprintf(
+                '(SELECT %s, ROW_NUMBER() OVER (%s) AS SEQUENCE FROM %s)t',
+                $this->sqlSelect,
+                $this->sqlOrder,
+                $this->name
+            ));
+
+            $this->sqlOffset = preg_replace('/\D/', '', $this->sqlOffset);
+            $this->sqlTop = preg_replace('/\D/', '', $this->sqlTop);
+            $start = ((int)$this->sqlOffset) + 1;
+            $end = ((int)$this->sqlTop) + ((int)$this->sqlOffset);
+            if(!empty($conditions)) {
+               $conditions .= ' AND SEQUENCE BETWEEN '.$start.' AND '.$end;
+            } else {
+                $conditions .= ' WHERE SEQUENCE BETWEEN '.$start.' AND '.$end;
+            }
+            $this->sqlTop = $this->sqlOrder = $this->sqlOffset = '';
         }
 
         return trim(sprintf(
