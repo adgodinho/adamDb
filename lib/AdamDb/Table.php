@@ -792,7 +792,10 @@ class Table
         
         if (empty($this->sqlSelect)) {
             if(empty($this->columns)) {
+                $debug = $this->db->getConnection()->debug;
+                $this->db->getConnection()->debug = false;
                 $columnsName = $this->db->execute("select column_name from information_schema.columns where table_name = ? order by ordinal_position", array($this->name));
+                $this->db->getConnection()->debug = $debug;
                 if(!empty($columnsName)) {
                     $columnsName = $columnsName->getRows();
                     foreach ($columnsName as $key => $value) {
@@ -807,6 +810,32 @@ class Table
         }
 
         $this->groupBy = $this->db->escapeIdentifierList($this->groupBy);
+        $this->name = $this->db->escapeIdentifier($this->name);
+        $conditions = $this->conditionBuilder->build();
+
+        if(($this->db->getDriver() instanceof Mssql) && !empty($this->sqlOffset)) {
+            if(!empty($this->sqlTop) && !empty($this->sqlOrder)) {
+                $this->name = trim(sprintf(
+                    '(SELECT %s, ROW_NUMBER() OVER (%s) AS SEQUENCE FROM %s)t',
+                    $this->sqlSelect,
+                    $this->sqlOrder,
+                    $this->name
+                ));
+
+                $this->sqlOffset = preg_replace('/\D/', '', $this->sqlOffset);
+                $this->sqlTop = preg_replace('/\D/', '', $this->sqlTop);
+                $start = ((int)$this->sqlOffset) + 1;
+                $end = ((int)$this->sqlTop) + ((int)$this->sqlOffset);
+                if(!empty($conditions)) {
+                   $conditions .= ' AND SEQUENCE BETWEEN '.$start.' AND '.$end;
+                } else {
+                    $conditions .= ' WHERE SEQUENCE BETWEEN '.$start.' AND '.$end;
+                }
+                $this->sqlTop = $this->sqlOrder = $this->sqlOffset = '';
+            } else {
+                throw new SQLException("MSSQL offset() only works in conjunction with limit() and orderBy().");
+            }
+        }
 
         return trim(sprintf(
             'SELECT %s %s FROM %s %s %s %s %s %s %s %s',
@@ -814,7 +843,7 @@ class Table
             $this->sqlSelect,
             $this->db->escapeIdentifier($this->name),
             implode(' ', $this->joins),
-            $this->conditionBuilder->build(),
+            $conditions,
             empty($this->groupBy) ? '' : 'GROUP BY '.implode(', ', $this->groupBy),
             $this->sqlOrder,
             $this->sqlLimit,

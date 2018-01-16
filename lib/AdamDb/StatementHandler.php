@@ -252,7 +252,6 @@ class StatementHandler
             
             $adodb = $this->db->getConnection();
             $handle = $adodb->prepare($this->sql);
-            //$this->bindParams($pdoStatement);
             $result = $adodb->execute($handle, $this->positionalParams);
 
             $this->afterExecute();

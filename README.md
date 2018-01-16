@@ -142,6 +142,12 @@ $db->table('mytable')->asc('column1')->desc('column2')->findAll();
 $db->table('mytable')->limit(10)->offset(5)->findAll();
 ```
 
+MSSQL offset() only works in conjunction with limit() and orderBy():
+
+```php
+$mssql->table("mytable")->->limit(1)->orderBy('column')->offset(1)->findAll();
+```
+
 ### Fetch only SOME COLUMNS
 
 ```php

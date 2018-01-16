@@ -208,9 +208,9 @@ class Database
      * @access public
      * @return $this
      */
-    public function debug()
+    public function debug($value = true)
     {
-        $this->getConnection()->debug = true;
+        $this->getConnection()->debug = $value;
     }
 
     /**
