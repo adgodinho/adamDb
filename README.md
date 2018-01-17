@@ -42,13 +42,43 @@ $db = new Database($ADODB);
 ### INSERTION
 
 ```php
-$db->table('mytable')->save(array('column1' => 'test'));
+$array = array( 'column1' => 'value1', 
+                'column2' => 'value2', 
+                'column3' => 'value3', 
+                'column4' => 'value4', 
+                'column5' => 'value5');
+
+$resultados = $ms->table('tableName')
+  ->insert($array)
+  ->execute();
 ```
 
 or
 
 ```php
-$db->table('mytable')->insert(array('column1' => 'test'));
+$pg->table('tableName')
+  ->insert()
+  ->column('column1', 'value1')
+  ->column('column2', 'value2')
+  ->column('column3', 'value3')
+  ->column('column4', $pg->timestamp(), false)
+  ->column('column5', 'value5')
+  ->execute();
+```
+
+or
+
+```php
+
+$array = array( 'column1' => 'value1', 
+                'column2' => 'value2', 
+                'column3' => 'value3');
+
+$pg->table('tableName')
+  ->insert($array)
+  ->column('column4', 'value4')
+  ->column('column5', $pg->timestamp(), false)
+  ->execute();
 ```
 
 ### Fetch LAST INSERTED ID

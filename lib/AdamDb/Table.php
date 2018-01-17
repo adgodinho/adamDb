@@ -208,17 +208,17 @@ class Table
         return $this->conditionBuilder;
     }
 
-    /**
-     * Insert or update
-     *
-     * @access public
-     * @param  array    $data
-     * @return boolean
-     */
-    public function save(array $data)
-    {
-        return $this->conditionBuilder->hasCondition() ? $this->update($data) : $this->insert($data);
-    }
+    // /**
+    //  * Insert or update
+    //  *
+    //  * @access public
+    //  * @param  array    $data
+    //  * @return boolean
+    //  */
+    // public function save(array $data)
+    // {
+    //     return $this->conditionBuilder->hasCondition() ? $this->update($data) : $this->insert($data);
+    // }
 
     /**
      * Update
@@ -245,14 +245,11 @@ class Table
      * @param  array    $data
      * @return boolean
      */
-    public function insert(array $data)
+    public function insert(array $data = array())
     {
-        $sql = InsertBuilder::getInstance($this->db, $this->conditionBuilder)
+         return InsertBuilder::getInstance($this->db, $this->conditionBuilder)
                 ->withTable($this->name)
-                ->withColumns($data)
-                ->build();
-
-        return $this->db->execute($sql, $this->conditionBuilder->getValues()) !== false;
+                ->withColumns($data);
     }
 
     /**

@@ -11,6 +11,14 @@ require_once dirname(__FILE__).'/BaseBuilder.php';
 class InsertBuilder extends BaseBuilder
 {
     /**
+     * Insert unescaped 
+     *
+     * @access private
+     * @var    string[]
+     */
+    private $insertColumns = array();
+
+    /**
      * Get object instance
      *
      * @static
@@ -26,23 +34,35 @@ class InsertBuilder extends BaseBuilder
     }
 
     /**
-     * Build SQL
+     * Execute insert
      *
      * @access public
      * @return string
      */
-    public function build()
-    {
-        return sprintf(
+    public function execute()
+    {   
+        $sql = sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
             $this->db->escapeIdentifier($this->table),
-            implode(', ', array_keys($this->columns)),
-            implode(', ', array_map(array($this, 'escapeValues'), array_values($this->columns)))
+            implode(', ', array_merge(array_keys($this->columns), array_keys($this->insertColumns))),
+            implode(', ', array_merge(array_map(array($this, 'escapeValues'), array_values($this->columns)), array_values($this->insertColumns)))
         );
+
+        return $this->db->execute($sql, $this->conditionBuilder->getValues()) !== false;
     }
 
-    public function escapeValues($value) 
+    private function escapeValues($value) 
     {
         return "'".$value."'";
+    }
+
+    public function column($column, $value, $escaped = true)
+    {
+        if($escaped) {
+            $this->insertColumns[$column] = "'".$value."'";
+        } else {
+            $this->insertColumns[$column] = $value;
+        }
+        return $this;
     }
 }
