@@ -826,10 +826,11 @@ class Table
             }
 
             $this->name = trim(sprintf(
-                '(SELECT %s, ROW_NUMBER() OVER (%s) AS SEQUENCE FROM %s)t',
+                '(SELECT %s, ROW_NUMBER() OVER (%s) AS SEQUENCE FROM %s %s)t',
                 $this->sqlSelect,
                 $this->sqlOrder,
-                $this->name
+                $this->name,
+                implode(' ', $this->joins)
             ));
 
             $this->sqlOffset = preg_replace('/\D/', '', $this->sqlOffset);
@@ -842,6 +843,8 @@ class Table
                 $conditions .= ' WHERE SEQUENCE BETWEEN '.$start.' AND '.$end;
             }
             $this->sqlTop = $this->sqlOrder = $this->sqlOffset = '';
+            $this->joins = array();
+            $this->sqlSelect = implode(', ', preg_replace('/(.*[as|As|aS|AS] |.*\.)/', '', $this->columns));
         }
 
         return trim(sprintf(
