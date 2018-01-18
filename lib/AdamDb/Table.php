@@ -283,7 +283,13 @@ class Table
         );
 
         $result = $this->db->execute($sql, $this->conditionBuilder->getValues());
-        return $result->rowCount() > 0;
+
+        $debug = $this->db->getConnection()->debug;
+        $this->db->getConnection()->debug = false;
+        $affectedRows = $this->db->getConnection()->Affected_Rows();
+        $this->db->getConnection()->debug = $debug;
+
+        return $affectedRows > 0;
     }
 
     /**
