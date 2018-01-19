@@ -167,7 +167,7 @@ class ConditionBuilder
      */
     public function beginOr()
     {
-        $this->addCondition(' OR ( ');
+        $this->addCondition($this->getConnector(' OR ').'( ');
         $this->conditionOffset++;
     }
 
@@ -188,7 +188,7 @@ class ConditionBuilder
      */
     public function beginAnd()
     {
-        $this->addCondition(' AND ( ');
+         $this->addCondition($this->getConnector(' AND ').'( ');
         $this->conditionOffset++;
     }
 
