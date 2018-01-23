@@ -503,7 +503,7 @@ $subquery = $db->table('another_table')->columns('column2')->where('column3', 'v
 
 $db->table('mytable')
        ->columns('column_5')
-       ->whereIn($subquery)
+       ->whereIn(('column1', $subquery)
        ->findAll();
 ```
 
