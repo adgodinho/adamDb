@@ -336,9 +336,14 @@ class Table
     public function findAllByColumn($column)
     {
         $this->columns = array($column);
-        $rq = $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues());
+        $rq = $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues())->getRows();
 
-        return $rq->getRows();
+        $records = array();
+        foreach ($rq as $key => $value) {
+            $records[$key] = $value[$column];
+        }
+
+        return $records;
     }
 
     /**
@@ -367,7 +372,12 @@ class Table
         $this->limit(1);
         $this->columns = array($column);
 
-        return array_pop($this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues())->fields);
+        $records = $this->db->execute($this->buildSelectQuery(), $this->conditionBuilder->getValues())->fields;
+        if(is_array($records)) {
+            return array_pop($records);
+        } else {
+            return false;
+        }
     }
 
     /**
