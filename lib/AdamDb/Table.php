@@ -835,29 +835,28 @@ class Table
                 $this->sqlOrder = 'ORDER BY '.implode(', ', array_values( $metaPrimaryKeys)).' ASC';
             }
 
-            $this->name = trim(sprintf(
-                '(SELECT %s, ROW_NUMBER() OVER (%s) AS SEQUENCE FROM %s %s)t',
+            $this->name = sprintf(
+                '(SELECT %s, ROW_NUMBER() OVER (%s) AS SEQUENCE FROM %s %s %s %s)t',
                 $this->sqlSelect,
                 $this->sqlOrder,
                 $this->name,
-                implode(' ', $this->joins)
-            ));
+                implode(' ', $this->joins),
+                $conditions,
+                empty($this->groupBy) ? '' : 'GROUP BY '.implode(', ', $this->groupBy)
+            );
 
             $this->sqlOffset = preg_replace('/\D/', '', $this->sqlOffset);
             $this->sqlTop = preg_replace('/\D/', '', $this->sqlTop);
             $start = ((int)$this->sqlOffset) + 1;
             $end = ((int)$this->sqlTop) + ((int)$this->sqlOffset);
-            if(!empty($conditions)) {
-               $conditions .= ' AND SEQUENCE BETWEEN '.$start.' AND '.$end;
-            } else {
-                $conditions .= ' WHERE SEQUENCE BETWEEN '.$start.' AND '.$end;
-            }
-            $this->sqlTop = $this->sqlOrder = $this->sqlOffset = '';
+
+            $conditions = ' WHERE SEQUENCE BETWEEN '.$start.' AND '.$end;
+            $this->sqlTop = $this->sqlOrder = $this->sqlOffset = $this->groupBy = '';
             $this->joins = array();
             $this->sqlSelect = implode(', ', preg_replace('/(.*[as|As|aS|AS] |.*\.)/', '', $this->columns));
         }
 
-        return trim(sprintf(
+        $finalSql = sprintf(
             'SELECT %s %s FROM %s %s %s %s %s %s %s %s',
             $this->sqlTop,
             $this->sqlSelect,
@@ -869,7 +868,9 @@ class Table
             $this->sqlLimit,
             $this->sqlOffset,
             $this->sqlUnion
-        ));
+        );
+
+        return trim(preg_replace("/ {2,}/", " ", $finalSql));
     }
 
     /**
