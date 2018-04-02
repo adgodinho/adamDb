@@ -357,7 +357,11 @@ class Table
         $this->limit(1);
         $result = $this->findAll();
 
-        return $result;
+        if(is_array($result)) {
+            return array_pop($result);
+        } else {
+            return false;
+        }
     }
 
     /**
